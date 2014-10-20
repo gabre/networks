@@ -5,17 +5,14 @@ import java.awt.Dimension;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-
-import org.graphstream.ui.layout.Layout;
 import org.graphstream.ui.swingViewer.View;
-import org.graphstream.ui.swingViewer.Viewer;
 
 
 public class MainWindow {
 	private Graph graph;
 	
 	public MainWindow() {
-		graph = new Graph();		
+		graph = new Graph(15);		
 
 		JFrame window = new JFrame();
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

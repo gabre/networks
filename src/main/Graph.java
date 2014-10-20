@@ -1,12 +1,11 @@
 package main;
 
-import java.util.Collection;
+import java.util.Random;
 
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.swingViewer.View;
 import org.graphstream.ui.swingViewer.Viewer;
-import org.graphstream.ui.*;
 import org.graphstream.util.Filter;
 import org.graphstream.util.FilteredNodeIterator;
 import org.graphstream.util.Filters;
@@ -18,25 +17,59 @@ public class Graph {
 			"fill-color: red; " +
 			"}";
 	
+	Random rand = new Random();
+	
 	private org.graphstream.graph.Graph graph;
+	private int nodecount;
 
-	public Graph()
+	public Graph(int n)
 	{
-		graph = new SingleGraph("Tutorial 1");
+		nodecount = n;
 		
+		graph = new SingleGraph("asd");
 		graph.addAttribute("ui.stylesheet", styleSheet);
-		Node a = graph.addNode("A");
-		Node b = graph.addNode("B");
-		Node c = graph.addNode("C");
-		graph.addEdge("AB", "A", "B");
-		graph.addEdge("BC", "B", "C");
-		graph.addEdge("CA", "C", "A");
-
-		a.addAttribute("ui.label", "informed");
-		a.addAttribute("ui.class", "informed");
-		b.addAttribute("ui.class", "informed");
-		c.addAttribute("ui.class", "uninformed");
 		
+		char c = 'A';
+		for (int i = 0; i < n; i++, c++)
+		{
+			Node node = graph.addNode(Character.toString(c));
+			node.addAttribute("ui.class", "uninformed");
+			node.addAttribute("ui.label", Character.toString(c));
+		}
+		
+		addEdges(0.2);
+	}
+	
+	public Graph (Graph other)
+	{
+		graph = new SingleGraph("asd");
+		graph.addAttribute("ui.stylesheet", styleSheet);
+		
+		for (Node node : other.graph.getEachNode())
+		{
+			Node copied = graph.addNode(node.getId());
+			copied.addAttribute("ui.label", node.getAttribute("ui.label"));
+			copied.addAttribute("ui.class", node.getAttribute("ui.class"));
+			
+		}		
+	}
+	
+	private void addEdges(double probability)
+	{
+		for (int v = 0; v < nodecount; v++)
+		{
+			Node vnode = graph.getNode(v);
+			for (int w = 0; w < nodecount; w++)
+			{
+				if (v != w && !vnode.hasEdgeBetween(w) && bernoulli(probability))
+					graph.addEdge(IdGenerator.nextId(), v, w);
+			}
+		}
+	}
+	
+	private boolean bernoulli (double p)
+	{
+		return rand.nextDouble() < p;
 	}
 	
 	public View getViewer()
