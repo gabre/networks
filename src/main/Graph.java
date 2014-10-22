@@ -1,46 +1,35 @@
 package main;
 
+import java.awt.Component;
+import java.awt.Dimension;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Random;
 
-import org.graphstream.graph.Node;
-import org.graphstream.graph.implementations.SingleGraph;
-import org.graphstream.ui.swingViewer.View;
-import org.graphstream.ui.swingViewer.Viewer;
-import org.graphstream.util.Filter;
-import org.graphstream.util.FilteredNodeIterator;
-import org.graphstream.util.Filters;
+import edu.uci.ics.jung.algorithms.layout.CircleLayout;
+import edu.uci.ics.jung.algorithms.layout.Layout;
+import edu.uci.ics.jung.graph.UndirectedSparseGraph;
+import edu.uci.ics.jung.visualization.BasicVisualizationServer;
+import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
 
 public class Graph {
-	
-	private static String styleSheet = 
-			"node.informed {" +
-			"fill-color: red; " +
-			"}";
-	
-	Random rand = new Random();
-	
-	private org.graphstream.graph.Graph graph;
-	private int nodecount;
+	private edu.uci.ics.jung.graph.Graph<Vertex, String> graph;
+	private Random rand = new Random();
 
 	public Graph(int n)
-	{
-		nodecount = n;
-		
-		graph = new SingleGraph("asd");
-		graph.addAttribute("ui.stylesheet", styleSheet);
+	{	
+		graph = new UndirectedSparseGraph<>();
 		
 		char c = 'A';
 		for (int i = 0; i < n; i++, c++)
 		{
-			Node node = graph.addNode(Character.toString(c));
-			node.addAttribute("ui.class", "uninformed");
-			node.addAttribute("ui.label", Character.toString(c));
+			graph.addVertex(new Vertex(Character.toString(c)));
 		}
 		
 		addEdges(0.2);
 	}
 	
-	public Graph (Graph other)
+/*	public Graph (Graph other)
 	{
 		graph = new SingleGraph("asd");
 		graph.addAttribute("ui.stylesheet", styleSheet);
@@ -52,17 +41,16 @@ public class Graph {
 			copied.addAttribute("ui.class", node.getAttribute("ui.class"));
 			
 		}		
-	}
+	}*/
 	
 	private void addEdges(double probability)
 	{
-		for (int v = 0; v < nodecount; v++)
+		for (Vertex v : graph.getVertices())
 		{
-			Node vnode = graph.getNode(v);
-			for (int w = 0; w < nodecount; w++)
+			for (Vertex w : graph.getVertices())
 			{
-				if (v != w && !vnode.hasEdgeBetween(w) && bernoulli(probability))
-					graph.addEdge(IdGenerator.nextId(), v, w);
+				if (!v.equals(w) && !graph.isNeighbor(v, w) && bernoulli(probability))
+					graph.addEdge(v.getLabel() + w.getLabel(), v, w);
 			}
 		}
 	}
@@ -72,20 +60,30 @@ public class Graph {
 		return rand.nextDouble() < p;
 	}
 	
-	public View getViewer()
+	public Component getViewer()
 	{
-		Viewer viewer = new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_SWING_THREAD);
-		viewer.enableAutoLayout();
-		View view = viewer.addDefaultView(false);
+		Layout<Vertex, String> layout = new CircleLayout<Vertex, String>(graph);
+		layout.setSize(new Dimension(300,300));
 		
-		return view;
+		BasicVisualizationServer<Vertex,String> vv = 
+				 new BasicVisualizationServer<Vertex,String>(layout);
+		vv.setPreferredSize(new Dimension(350,350));
+		
+		vv.getRenderContext().setVertexLabelTransformer(new Vertex.Labeller());
+		vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);		
+		
+		return vv;
 	}
 	
 	public boolean isAllInformed()
 	{
-		Filter<Node> filter = Filters.byAttributeFilter("ui.class", "uninformed");
-		FilteredNodeIterator<Node> uninformed = new FilteredNodeIterator<>(graph, filter);
+		Iterator<Vertex> vertices = graph.getVertices().iterator();
+		boolean isallinformed = true;
+		while (vertices.hasNext() && isallinformed)
+		{
+			isallinformed &= vertices.next().isInformed();
+		}
 		
-		return !uninformed.hasNext();
+		return isallinformed;
 	}
 }
