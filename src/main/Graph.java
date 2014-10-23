@@ -2,7 +2,9 @@ package main;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -15,15 +17,19 @@ import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
 public class Graph {
 	private edu.uci.ics.jung.graph.Graph<Vertex, String> graph;
 	private Random rand = new Random();
+	private List<Vertex> vertices;
 
 	public Graph(int n)
 	{	
 		graph = new UndirectedSparseGraph<>();
+		vertices = new ArrayList<>(n);
 		
 		char c = 'A';
 		for (int i = 0; i < n; i++, c++)
 		{
-			graph.addVertex(new Vertex(Character.toString(c)));
+			Vertex v = new Vertex(Character.toString(c));
+			graph.addVertex(v);
+			vertices.add(v);
 		}
 		
 		addEdges(0.2);
@@ -62,7 +68,8 @@ public class Graph {
 	
 	public Component getViewer()
 	{
-		Layout<Vertex, String> layout = new CircleLayout<Vertex, String>(graph);
+		CircleLayout<Vertex, String> layout = new CircleLayout<Vertex, String>(graph);
+		layout.setVertexOrder(vertices);
 		layout.setSize(new Dimension(300,300));
 		
 		BasicVisualizationServer<Vertex,String> vv = 
@@ -70,7 +77,7 @@ public class Graph {
 		vv.setPreferredSize(new Dimension(350,350));
 		
 		vv.getRenderContext().setVertexLabelTransformer(new Vertex.Labeller());
-		vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);		
+		vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);	
 		
 		return vv;
 	}
