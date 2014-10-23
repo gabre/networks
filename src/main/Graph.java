@@ -24,6 +24,8 @@ public class Graph {
 
 	public Graph(int n)
 	{	
+		if (n > 25)
+			throw new IllegalArgumentException();
 		graph = new UndirectedSparseGraph<>();
 		vertices = new ArrayList<>(n);
 		
@@ -35,7 +37,7 @@ public class Graph {
 			vertices.add(v);
 		}
 		
-		addEdges(0.3);
+		addEdges(0.7);
 		informInitialVertex();
 	}
 	
