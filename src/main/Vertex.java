@@ -1,5 +1,8 @@
 package main;
 
+import java.awt.Color;
+import java.awt.Paint;
+
 import org.apache.commons.collections15.Transformer;
 
 public class Vertex {
@@ -58,5 +61,16 @@ public class Vertex {
 		public String transform(Vertex arg0) {
 			return arg0.label;
 		}		
+	}
+	
+	public static class Painter implements Transformer<Vertex, Paint>
+	{
+		@Override
+		public Paint transform(Vertex arg0) {
+			if (arg0.informed)
+				return Color.GREEN;
+			else
+				return Color.RED;
+		}
 	}
 }

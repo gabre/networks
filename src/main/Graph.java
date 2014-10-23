@@ -3,15 +3,18 @@ package main;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import edu.uci.ics.jung.algorithms.layout.CircleLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import edu.uci.ics.jung.visualization.BasicVisualizationServer;
+import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
 
 public class Graph {
@@ -32,7 +35,8 @@ public class Graph {
 			vertices.add(v);
 		}
 		
-		addEdges(0.2);
+		addEdges(0.3);
+		informInitialVertex();
 	}
 	
 /*	public Graph (Graph other)
@@ -76,10 +80,54 @@ public class Graph {
 				 new BasicVisualizationServer<Vertex,String>(layout);
 		vv.setPreferredSize(new Dimension(350,350));
 		
-		vv.getRenderContext().setVertexLabelTransformer(new Vertex.Labeller());
+		RenderContext<Vertex, String> context = vv.getRenderContext();
+		context.setVertexLabelTransformer(new Vertex.Labeller());
+		context.setVertexFillPaintTransformer(new Vertex.Painter());
 		vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);	
 		
 		return vv;
+	}
+	
+	public void spreadRumor()
+	{
+		Set<Vertex> done = new HashSet<>();
+		Iterator<Vertex> it = vertices.iterator();
+		while (it.hasNext())
+		{
+			Vertex v = it.next();
+			if (!done.contains(v))
+			{
+				Vertex neighboor = chooseNeighboor(v);
+				if (v.isInformed())
+				{
+					if (!neighboor.isInformed())
+					{
+						neighboor.inform();
+						done.add(neighboor);
+					}
+				} else
+				{
+					if (neighboor.isInformed())
+					{
+						v.inform();
+					}
+					
+				}
+				done.add(v);
+			}
+		}
+	}
+	
+	private void informInitialVertex()
+	{
+		int count = vertices.size();
+		Vertex chosen = vertices.get(rand.nextInt(count));
+		chosen.inform();
+	}
+	
+	private Vertex chooseNeighboor(Vertex vertex)
+	{
+		return null;
 	}
 	
 	public boolean isAllInformed()
