@@ -6,20 +6,19 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
 import edu.uci.ics.jung.algorithms.layout.CircleLayout;
-import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import edu.uci.ics.jung.visualization.BasicVisualizationServer;
 import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
 
 public class Graph {
+	private static Random rand = new Random();
+	
 	private edu.uci.ics.jung.graph.Graph<Vertex, String> graph;
-	private Random rand = new Random();
 	private List<Vertex> vertices;
 
 	public Graph(int n)
@@ -37,26 +36,29 @@ public class Graph {
 			vertices.add(v);
 		}
 		
-		addEdges(0.7);
+		addEdges(0.5);
 		informInitialVertex();
 	}
 	
-/*	public Graph (Graph other)
+	public Graph (Graph other)
 	{
-		graph = new SingleGraph("asd");
-		graph.addAttribute("ui.stylesheet", styleSheet);
+		graph = new UndirectedSparseGraph<>();
+		vertices = new ArrayList<>(other.vertices.size());
 		
-		for (Node node : other.graph.getEachNode())
+		for (Vertex v : other.vertices)
 		{
-			Node copied = graph.addNode(node.getId());
-			copied.addAttribute("ui.label", node.getAttribute("ui.label"));
-			copied.addAttribute("ui.class", node.getAttribute("ui.class"));
-			
-		}		
-	}*/
+			Vertex clone = v.clone();
+			graph.addVertex(clone);
+			vertices.add(clone);
+		}
+		
+		addEdges(0.5);
+	}
 	
-	private void addEdges(double probability)
+	public void addEdges(double probability)
 	{
+		for (String e : graph.getEdges())
+			graph.removeEdge(e);
 		for (Vertex v : graph.getVertices())
 		{
 			for (Vertex w : graph.getVertices())
@@ -88,6 +90,18 @@ public class Graph {
 		vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);	
 		
 		return vv;
+	}
+	
+	public void visualize(Component onThis)
+	{
+		CircleLayout<Vertex, String> layout = new CircleLayout<Vertex, String>(graph);
+		layout.setVertexOrder(vertices);
+		layout.setSize(new Dimension(300,300));
+		
+		@SuppressWarnings("unchecked")
+		BasicVisualizationServer<Vertex,String> vv = (BasicVisualizationServer<Vertex, String>) onThis;
+		
+		vv.setGraphLayout(layout);
 	}
 	
 	public void spreadRumor()

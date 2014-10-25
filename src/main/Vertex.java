@@ -15,6 +15,12 @@ public class Vertex {
 		informed = false;
 	}
 	
+	public Vertex (Vertex other)
+	{
+		label = other.label;
+		informed = other.informed;
+	}
+	
 	public String getLabel()
 	{
 		return label;
@@ -28,6 +34,11 @@ public class Vertex {
 	public boolean isInformed()
 	{
 		return informed;
+	}
+	
+	public Vertex clone()
+	{
+		return new Vertex(this);
 	}
 
 	@Override
