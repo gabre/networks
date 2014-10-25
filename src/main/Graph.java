@@ -17,7 +17,6 @@ import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
 
 public class Graph {
 	private static Random rand = new Random();
-	
 	private edu.uci.ics.jung.graph.Graph<Vertex, String> graph;
 	private List<Vertex> vertices;
 
@@ -57,8 +56,6 @@ public class Graph {
 	
 	public void addEdges(double probability)
 	{
-		for (String e : graph.getEdges())
-			graph.removeEdge(e);
 		for (Vertex v : graph.getVertices())
 		{
 			for (Vertex w : graph.getVertices())
