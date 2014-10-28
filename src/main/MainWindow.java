@@ -19,6 +19,7 @@ public class MainWindow {
 	private List<Graph> history;
 	private int current;
 	private JFrame window;
+	private JButton next, prev;
 
 	private static final Dimension WINDOW_SIZE = new Dimension(530, 360);
 	
@@ -37,6 +38,7 @@ public class MainWindow {
 		window.setPreferredSize(WINDOW_SIZE);
 		window.add(visualizer);	
 		window.add(buttons());
+		toggleButtons();
 		
 		window.pack();
 		window.setVisible(true);
@@ -48,14 +50,14 @@ public class MainWindow {
 		JPanel place = new JPanel();
 		place.setLayout(new BoxLayout(place, BoxLayout.X_AXIS));
 
-		JButton next = new JButton("Next");
+		next = new JButton("Next");
 		next.addActionListener(new ActionListener() {		
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				    	next();
 				    }});
 		
-		JButton prev = new JButton("Previous");
+		prev = new JButton("Previous");
 		prev.addActionListener(new ActionListener() {
 			
 			@Override
@@ -79,6 +81,7 @@ public class MainWindow {
 			graph = history.get(current);
 			graph.visualize(visualizer);
 		}
+		toggleButtons();
 	}
 
 	public void next()
@@ -86,6 +89,7 @@ public class MainWindow {
 		if (current == history.size() - 1)
 		{
 			graph = new Graph(graph);
+			graph.spreadRumor();
 			history.add(graph);
 		}
 		else
@@ -94,6 +98,13 @@ public class MainWindow {
 		}
 		current++;
 		graph.visualize(visualizer);
+		toggleButtons();
+	}
+	
+	private void toggleButtons()
+	{
+		next.setEnabled(!graph.isAllInformed() || current != history.size() - 1);
+		prev.setEnabled(current > 0);
 	}
 
 }

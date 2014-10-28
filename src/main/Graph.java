@@ -3,6 +3,8 @@ package main;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -140,7 +142,15 @@ public class Graph {
 	
 	private Vertex chooseNeighboor(Vertex vertex)
 	{
-		return null;
+		Collection<Vertex> neighboors = graph.getNeighbors(vertex);
+		int chosen = rand.nextInt(neighboors.size());
+		Iterator<Vertex> it = neighboors.iterator();
+		while (chosen > 0)
+		{
+			it.next();
+			chosen--;
+		}
+		return it.next();
 	}
 	
 	public boolean isAllInformed()
