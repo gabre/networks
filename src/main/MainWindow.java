@@ -19,12 +19,12 @@ public class MainWindow {
 	private List<Graph> history;
 	private int current;
 	private JFrame window;
-	private JButton next, prev;
+	private JButton next, prev, spread;
 
 	private static final Dimension WINDOW_SIZE = new Dimension(530, 360);
 	
 	public MainWindow() {
-		graph = new Graph(5);
+		graph = new Graph(15);
 		history = new LinkedList<>();
 		history.add(graph);
 		current = 0;
@@ -67,14 +67,31 @@ public class MainWindow {
 			}
 		});
 		
+		spread = new JButton("Spread rumor");
+		spread.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				spread();
+				
+			}
+		});
+		
 		place.add(prev);
 		place.add(next);
+	//	place.add(spread);
 		
 		return place;
 		
 	}
 	
-	protected void previous() {
+	private void spread() {
+		graph.spreadRumor();
+		graph.visualize(visualizer);
+		toggleButtons();
+	}
+	
+	private void previous() {
 		if (current > 0)
 		{
 			current--;
@@ -84,13 +101,13 @@ public class MainWindow {
 		toggleButtons();
 	}
 
-	public void next()
+	private void next()
 	{
 		if (current == history.size() - 1)
 		{
-			graph = new Graph(graph);
-			graph.spreadRumor();
+			graph = new Graph(graph, false);
 			history.add(graph);
+			graph.spreadRumor();
 		}
 		else
 		{
@@ -105,6 +122,7 @@ public class MainWindow {
 	{
 		next.setEnabled(!graph.isAllInformed() || current != history.size() - 1);
 		prev.setEnabled(current > 0);
+		//spread.setEnabled(!graph.isAllInformed() && current == history.size() - 1);
 	}
 
 }

@@ -4,15 +4,17 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
+
 import edu.uci.ics.jung.algorithms.layout.CircleLayout;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
+import edu.uci.ics.jung.graph.util.Pair;
 import edu.uci.ics.jung.visualization.BasicVisualizationServer;
 import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
@@ -21,6 +23,8 @@ public class Graph {
 	private static Random rand = new Random();
 	private edu.uci.ics.jung.graph.Graph<Vertex, String> graph;
 	private List<Vertex> vertices;
+	private final double conductance;
+	private static final double edgeProbability = 0.1; 
 
 	public Graph(int n)
 	{	
@@ -37,11 +41,13 @@ public class Graph {
 			vertices.add(v);
 		}
 		
-		addEdges(0.5);
+		addEdges(edgeProbability);
 		informInitialVertex();
+		conductance = conductance();
+		
 	}
 	
-	public Graph (Graph other)
+	public Graph (Graph other, boolean copyEdges)
 	{
 		graph = new UndirectedSparseGraph<>();
 		vertices = new ArrayList<>(other.vertices.size());
@@ -53,8 +59,22 @@ public class Graph {
 			vertices.add(clone);
 		}
 		
-		addEdges(0.5);
+		if (copyEdges)
+		{
+			for (String edge : other.graph.getEdges())
+			{
+				Pair<Vertex> endpoints = other.graph.getEndpoints(edge);
+				graph.addEdge(edge, endpoints.getFirst(), endpoints.getSecond());
+			}
+			conductance = other.conductance;
+			System.out.println("edges: " + graph.getEdgeCount());
+		} else
+		{
+			addEdges(edgeProbability);
+			conductance = getConductance();
+		}
 	}
+	
 	
 	public void addEdges(double probability)
 	{
@@ -143,6 +163,10 @@ public class Graph {
 	private Vertex chooseNeighboor(Vertex vertex)
 	{
 		Collection<Vertex> neighboors = graph.getNeighbors(vertex);
+		if (neighboors.size() == 0)
+		{
+			System.out.println(vertex.getLabel() + " izolalt");
+		}
 		int chosen = rand.nextInt(neighboors.size());
 		Iterator<Vertex> it = neighboors.iterator();
 		while (chosen > 0)
@@ -163,5 +187,62 @@ public class Graph {
 		}
 		
 		return isallinformed;
+	}
+	
+	public double getConductance()
+	{
+		return conductance;
+	}
+	
+	private double conductance()
+	{
+		double min;
+		Set<Vertex> vertices = new HashSet<>(this.vertices);
+		Set<Set<Vertex>> powerset = Sets.powerSet(vertices);
+		Iterator<Set<Vertex>> it = powerset.iterator();
+		Set<Vertex> first = it.next();
+		if (first.isEmpty())
+			first = it.next();
+		Set<Vertex> others = Sets.difference(vertices, first);
+		min = cutset(first, others) / Math.min(volume(first), volume(others));
+		while (it.hasNext())
+		{
+			Set<Vertex> s = it.next();
+			others = Sets.difference(vertices, s);
+			double setConductance = cutset(s, others) / Math.min(volume(s), volume(others));
+			if (setConductance < min)
+			{
+				min = setConductance;
+			}
+		}		
+		return min;
+	}
+	
+	/**
+	 * Calculates the sum of degrees of vertices in s.
+	 * @param s set of vertices
+	 * @return sum of degrees
+	 */
+	private double volume(Set<Vertex> s)
+	{
+		return 0;
+	}
+	
+	/**
+	 * Calculates the number of edges having one endpoint in s, other in e
+	 * @param s
+	 * @param e
+	 * @return the number of edges between s and e
+	 */
+	private int cutset(Set<Vertex> s, Set<Vertex> e)
+	{
+		int edges = 0;
+		for (Vertex v : s)
+		{
+			Set<Vertex> neighboors = new HashSet<>(graph.getNeighbors(v));
+			Set<Vertex> inOtherSet = Sets.intersection(neighboors, e);
+			edges += inOtherSet.size();
+		}
+		return edges;
 	}
 }
