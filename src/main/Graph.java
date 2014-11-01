@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 
@@ -78,12 +80,14 @@ public class Graph {
 	
 	public void addEdges(double probability)
 	{
-		for (Vertex v : graph.getVertices())
+		while (!isConnected())
 		{
-			for (Vertex w : graph.getVertices())
-			{
-				if (!v.equals(w) && !graph.isNeighbor(v, w) && bernoulli(probability))
-					graph.addEdge(v.getLabel() + w.getLabel(), v, w);
+			for (Vertex v : graph.getVertices()) {
+				for (Vertex w : graph.getVertices()) {
+					if (!v.equals(w) && !graph.isNeighbor(v, w)
+							&& bernoulli(probability))
+						graph.addEdge(v.getLabel() + w.getLabel(), v, w);
+				}
 			}
 		}
 	}
@@ -244,5 +248,28 @@ public class Graph {
 			edges += inOtherSet.size();
 		}
 		return edges;
+	}
+	
+	/**
+	 * Breadth-first traversal.
+	 * @return
+	 */
+	private boolean isConnected()
+	{
+		Vertex first = graph.getVertices().iterator().next();
+		Set<Vertex> visited = new HashSet<>();
+		Queue<Vertex> notVisited = new LinkedList<>();
+		notVisited.add(first);
+
+		while (!notVisited.isEmpty())
+		{
+			Vertex v = notVisited.poll();
+			if (!visited.contains(v))
+			{
+				visited.add(v);
+				notVisited.addAll(graph.getNeighbors(v));
+			}
+		}
+		return visited.containsAll(graph.getVertices());
 	}
 }
