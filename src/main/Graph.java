@@ -73,7 +73,7 @@ public class Graph {
 		} else
 		{
 			addEdges(edgeProbability);
-			conductance = getConductance();
+			conductance = conductance();
 		}
 	}
 	
@@ -229,7 +229,10 @@ public class Graph {
 	 */
 	private double volume(Set<Vertex> s)
 	{
-		return 0;
+		int sumDegree = 0;
+		for (Vertex v : s)
+			sumDegree += graph.degree(v);
+		return sumDegree;
 	}
 	
 	/**
