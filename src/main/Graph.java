@@ -24,7 +24,7 @@ public class Graph {
 	private static Random rand = new Random();
 	private edu.uci.ics.jung.graph.Graph<Vertex, String> graph;
 	private List<Vertex> vertices;
-	private final double conductance;
+	private final double conductance, vertexExpansion;
 	private static final double edgeProbability = 0.1;
 	private static final int maxTries = 3;
 	private static final Dimension DISPLAY_SIZE = new Dimension(500, 500);
@@ -47,9 +47,10 @@ public class Graph {
 		addEdges(edgeProbability);
 		informInitialVertex();
 		conductance = conductance();
+		vertexExpansion = vertexExpansion();
 		
 	}
-	
+
 	public Graph (Graph other)
 	{
 		graph = new UndirectedSparseGraph<>();
@@ -63,6 +64,7 @@ public class Graph {
 		}
 		addEdges(edgeProbability);
 		conductance = conductance();
+		vertexExpansion = vertexExpansion();
 	}
 	
 	
@@ -201,12 +203,12 @@ public class Graph {
 		if (first.isEmpty())
 			first = it.next();
 		Set<Vertex> others = Sets.difference(vertices, first);
-		min = cutset(first, others) / Math.min(volume(first), volume(others));
+		min = cutset(first) / Math.min(volume(first), volume(others));
 		while (it.hasNext())
 		{
 			Set<Vertex> s = it.next();
 			others = Sets.difference(vertices, s);
-			double setConductance = cutset(s, others) / Math.min(volume(s), volume(others));
+			double setConductance = cutset(s) / Math.min(volume(s), volume(others));
 			if (setConductance < min)
 			{
 				min = setConductance;
@@ -229,21 +231,45 @@ public class Graph {
 	}
 	
 	/**
-	 * Calculates the number of edges having one endpoint in s, other in e
-	 * @param s
-	 * @param e
-	 * @return the number of edges between s and e
+	 * Calculates the number of edges having one endpoint in <b>s</b> and the other 
+	 * outside of <b>s</b>
+	 * @param s the vertex set
+	 * @return the number of edges
 	 */
-	private int cutset(Set<Vertex> s, Set<Vertex> e)
+	private int cutset(Set<Vertex> s)
 	{
 		int edges = 0;
 		for (Vertex v : s)
 		{
 			Set<Vertex> neighboors = new HashSet<>(graph.getNeighbors(v));
-			Set<Vertex> inOtherSet = Sets.intersection(neighboors, e);
-			edges += inOtherSet.size();
+			Set<Vertex> notInS = Sets.difference(neighboors, s);
+			edges += notInS.size();
 		}
 		return edges;
+	}	
+	
+	/**
+	 * Calculates the number of vertices that are outside of <b>s</b> but adjacent to 
+	 * some node in <b>s</b>
+	 * @param s the vertex set
+	 * @return the number of vertices
+	 */
+	private int adjacents(Set<Vertex> s)
+	{
+		Set<Vertex> outside = new HashSet<>();
+		for (Vertex v : s)
+		{
+			Set<Vertex> neighboors = new HashSet<>(graph.getNeighbors(v));
+			Set<Vertex> notInS = Sets.difference(neighboors, s);
+			outside.addAll(notInS);
+		}
+		return outside.size();
+	}
+	
+	
+	private double vertexExpansion() {
+		
+		return 0;
 	}
 	
 	/**
