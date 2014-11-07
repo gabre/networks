@@ -49,7 +49,6 @@ public class Graph {
 		informInitialVertex();
 		conductance = conductance();
 		vertexExpansion = vertexExpansion();
-
 	}
 
 	public Graph(Graph other) {
@@ -187,6 +186,8 @@ public class Graph {
 		Set<Vertex> first = it.next();
 		if (first.isEmpty())
 			first = it.next();
+		if (first.size() == vertexSet.size())
+			first = it.next();
 		min = conductance(first);
 		while (it.hasNext()) {
 			Set<Vertex> s = it.next();
@@ -248,8 +249,8 @@ public class Graph {
 	private int adjacents(Set<Vertex> s) {
 		Set<Vertex> outside = new HashSet<>();
 		for (Vertex v : s) {
-			Set<Vertex> neighboors = new HashSet<>(graph.getNeighbors(v));
-			Set<Vertex> notInS = Sets.difference(neighboors, s);
+			Set<Vertex> neighbors = new HashSet<>(graph.getNeighbors(v));
+			Set<Vertex> notInS = Sets.difference(neighbors, s);
 			outside.addAll(notInS);
 		}
 		return outside.size();
@@ -266,6 +267,8 @@ public class Graph {
 		Iterator<Set<Vertex>> it = powerset.iterator();
 		Set<Vertex> first = it.next();
 		if (first.isEmpty())
+			first = it.next();
+		if (first.size() == vertexSet.size())
 			first = it.next();
 		min = vertexExpansion(first);
 		while (it.hasNext()) {
@@ -288,15 +291,13 @@ public class Graph {
 	 * @return vertex expansion
 	 */
 	private double vertexExpansion(Set<Vertex> s) {
-		int neighboors = adjacents(s);
-		Set<Vertex> others = Sets.difference(vertexSet, s);
-		return neighboors / Math.min(s.size(), others.size());
+		return (double)adjacents(s) / Math.min(s.size(), vertexSet.size() - s.size());
 	}
 
 	/**
 	 * Breadth-first traversal.
 	 * 
-	 * @return
+	 * @return true if the graph is connected, otherwise returns false
 	 */
 	private boolean isConnected() {
 		Vertex first = graph.getVertices().iterator().next();
