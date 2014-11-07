@@ -28,6 +28,7 @@ public class Graph {
 	private final double conductance;
 	private static final double edgeProbability = 0.1;
 	private static final int maxTries = 3;
+	private static final Dimension DISPLAY_SIZE = new Dimension(500, 500);
 
 	public Graph(int n)
 	{	
@@ -94,11 +95,11 @@ public class Graph {
 	{
 		CircleLayout<Vertex, String> layout = new CircleLayout<Vertex, String>(graph);
 		layout.setVertexOrder(vertices);
-		layout.setSize(new Dimension(300,300));
+		layout.setSize(DISPLAY_SIZE);
 		
 		BasicVisualizationServer<Vertex,String> vv = 
 				 new BasicVisualizationServer<Vertex,String>(layout);
-		vv.setPreferredSize(new Dimension(350,350));
+		vv.setPreferredSize(DISPLAY_SIZE);
 		
 		RenderContext<Vertex, String> context = vv.getRenderContext();
 		context.setVertexLabelTransformer(new Vertex.Labeller());
@@ -112,7 +113,7 @@ public class Graph {
 	{
 		CircleLayout<Vertex, String> layout = new CircleLayout<Vertex, String>(graph);
 		layout.setVertexOrder(vertices);
-		layout.setSize(new Dimension(300,300));
+		layout.setSize(DISPLAY_SIZE);
 		
 		@SuppressWarnings("unchecked")
 		BasicVisualizationServer<Vertex,String> vv = (BasicVisualizationServer<Vertex, String>) onThis;

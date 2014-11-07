@@ -27,7 +27,7 @@ public class MainWindow {
 	private JLabel counter, conductance;
 	private NumberFormat doubleFormat;
 
-	private static final Dimension WINDOW_SIZE = new Dimension(530, 360);
+	private static final Dimension WINDOW_SIZE = new Dimension(730, 560);
 	
 	public MainWindow() {
 		graph = new Graph(15);
