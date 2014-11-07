@@ -15,7 +15,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.text.NumberFormatter;
 
 
 public class MainWindow {
@@ -132,7 +131,7 @@ public class MainWindow {
 	{
 		if (current == history.size() - 1)
 		{
-			graph = new Graph(graph, false);
+			graph = new Graph(graph);
 			history.add(graph);
 			graph.spreadRumor();
 		}

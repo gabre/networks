@@ -26,7 +26,8 @@ public class Graph {
 	private edu.uci.ics.jung.graph.Graph<Vertex, String> graph;
 	private List<Vertex> vertices;
 	private final double conductance;
-	private static final double edgeProbability = 0.1; 
+	private static final double edgeProbability = 0.1;
+	private static final int maxTries = 3;
 
 	public Graph(int n)
 	{	
@@ -49,7 +50,7 @@ public class Graph {
 		
 	}
 	
-	public Graph (Graph other, boolean copyEdges)
+	public Graph (Graph other)
 	{
 		graph = new UndirectedSparseGraph<>();
 		vertices = new ArrayList<>(other.vertices.size());
@@ -60,27 +61,16 @@ public class Graph {
 			graph.addVertex(clone);
 			vertices.add(clone);
 		}
-		
-		if (copyEdges)
-		{
-			for (String edge : other.graph.getEdges())
-			{
-				Pair<Vertex> endpoints = other.graph.getEndpoints(edge);
-				graph.addEdge(edge, endpoints.getFirst(), endpoints.getSecond());
-			}
-			conductance = other.conductance;
-			System.out.println("edges: " + graph.getEdgeCount());
-		} else
-		{
-			addEdges(edgeProbability);
-			conductance = conductance();
-		}
+		addEdges(edgeProbability);
+		conductance = conductance();
 	}
 	
 	
 	public void addEdges(double probability)
 	{
-		while (!isConnected())
+		int tries = 0;
+		boolean connected = false;
+		while (tries < maxTries && !(connected = isConnected()))
 		{
 			for (Vertex v : graph.getVertices()) {
 				for (Vertex w : graph.getVertices()) {
@@ -89,7 +79,10 @@ public class Graph {
 						graph.addEdge(v.getLabel() + w.getLabel(), v, w);
 				}
 			}
+			tries++;
 		}
+		if (!connected)
+			addEdges(probability + 0.1);
 	}
 	
 	private boolean bernoulli (double p)
