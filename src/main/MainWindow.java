@@ -9,6 +9,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -26,11 +28,15 @@ public class MainWindow {
 	private JButton next, prev, spread;
 	private JLabel counter, conductance, expansion;
 	private NumberFormat doubleFormat;
+	private GraphGenerator generator;
+	private BlockingQueue<Graph> channel;
 
 	private static final Dimension WINDOW_SIZE = new Dimension(730, 560);
+	private static final int CHANNEL_CAPACITY = 10;
 	
 	public MainWindow() {
-		graph = new Graph(15);
+		int vertexCount = 15;
+		graph = new Graph(vertexCount);
 		history = new LinkedList<>();
 		history.add(graph);
 		current = 0;
@@ -43,6 +49,10 @@ public class MainWindow {
 		center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
 
 		visualizer = graph.getViewer();
+
+		channel = new LinkedBlockingQueue<>(CHANNEL_CAPACITY);
+		generator = new GraphGenerator(channel, graph);
+		startGenerator();
 		
 		window.setPreferredSize(WINDOW_SIZE);
 		center.add(visualizer);	
@@ -113,6 +123,12 @@ public class MainWindow {
 		return place;
 	}
 	
+	private void startGenerator()
+	{
+		Thread t = new Thread(generator);
+		t.start();
+	}
+	
 	private void spread() {
 		graph.spreadRumor();
 		graph.visualize(visualizer);
@@ -134,9 +150,8 @@ public class MainWindow {
 	{
 		if (current == history.size() - 1)
 		{
-			graph = new Graph(graph);
+			graph = channel.remove();
 			history.add(graph);
-			graph.spreadRumor();
 		}
 		else
 		{
