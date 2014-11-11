@@ -76,6 +76,16 @@ public class Graph {
 	{
 		return vertexCount;
 	}
+	
+	public boolean isRegular()
+	{
+		return Graph.regular;
+	}
+	
+	public int degrees()
+	{
+		return Graph.regularDegree;
+	}
 
 	private void addEdges(double probability) {
 		int tries = 0;
@@ -96,39 +106,54 @@ public class Graph {
 	
 	private void addEdges()
 	{
-		while (!isConnected())
-		{
-			clearEdges();
+		boolean connected = false;
+		while (!connected)
+		{			
 			if (regular)
 				regularEdges(Graph.regularDegree);
 			else
 				addEdges(edgeProbability);
+			if (!(connected = isConnected()))
+				clearEdges();
 		}
 	}
 	
 	private void regularEdges(int r) {
-		if (r * vertexCount % 2 != 0)
+		if (vertexCount <= r || r * vertexCount % 2 != 0)
 			throw new IllegalArgumentException("Graph is not constructible");
-		int maxtry = 4;
-		for (Vertex v : graph.getVertices()) {
-			int tries = 0;
+		Set<Vertex> notSaturated = new HashSet<>(vertexSet);
+		while (!notSaturated.isEmpty()) {
+			Vertex v = notSaturated.iterator().next();
+			notSaturated.remove(v);
 			int degree = graph.degree(v);
-			while (degree < r) {
-				int chosen = rand.nextInt(vertexCount);
-				Vertex w = vertices.get(chosen);
-				boolean isNeighboor = graph.isNeighbor(v, w);
+			Set<Vertex> neighboors = new HashSet<>(graph.getNeighbors(v));
+			Set<Vertex> potentialNeighboors = Sets.difference(notSaturated, neighboors);
+			while (degree < r && potentialNeighboors.size() > 0) {
+				int chosen = rand.nextInt(potentialNeighboors.size());
+				Vertex w = get(potentialNeighboors, chosen);
 				int otherDegree = graph.degree(w);
-				if (!v.equals(w) && !isNeighboor && otherDegree < r) {
-					graph.addEdge(v.getLabel() + w.getLabel(), v, w);
-					degree++;
+				graph.addEdge(v.getLabel() + w.getLabel(), v, w);
+				degree++;
+				if (otherDegree == r - 1) {
+					notSaturated.remove(w);
+					potentialNeighboors.remove(w);
 				}
-				else
-					tries++;
-				if (tries == maxtry)
-					return;
+
 			}
+			if (degree < r)
+				return;
 
 		}
+	}
+	
+	private Vertex get(Set<Vertex> s, int i)
+	{
+		Iterator<Vertex> it = s.iterator();
+		while (i > 0) {
+			it.next();
+			i--;
+		}
+		return it.next();
 	}
 	
 	private void clearEdges()
