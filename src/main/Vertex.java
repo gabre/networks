@@ -63,7 +63,12 @@ public class Vertex {
 				return false;
 		} else if (!label.equals(other.label))
 			return false;
-		return true;
+		return true;		
+	}
+	
+	@Override
+	public String toString() {
+		return label;
 	}
 	
 	public static class Labeller implements Transformer<Vertex, String>
