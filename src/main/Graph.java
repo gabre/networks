@@ -29,10 +29,15 @@ public class Graph {
 	private static final double edgeProbability = 0.1;
 	private static final int maxTries = 3;
 	private static final Dimension DISPLAY_SIZE = new Dimension(500, 500);
+	private static int vertexCount;
+	private static boolean regular;
+	private static int regularDegree;
 
-	public Graph(int n) {
+	public Graph(int n, boolean regular) {
 		if (n > 25)
 			throw new IllegalArgumentException();
+		vertexCount = n;
+		Graph.regular = regular;
 		graph = new UndirectedSparseGraph<>();
 		vertices = new ArrayList<>(n);
 		vertexSet = new HashSet<>();
@@ -44,8 +49,8 @@ public class Graph {
 			vertices.add(v);
 			vertexSet.add(v);
 		}
-
-		addEdges(edgeProbability);
+		Graph.regularDegree = 2;
+		addEdges();
 		informInitialVertex();
 		conductance = conductance();
 		vertexExpansion = vertexExpansion();
@@ -62,12 +67,17 @@ public class Graph {
 			vertices.add(clone);
 			vertexSet.add(clone);
 		}
-		addEdges(edgeProbability);
+		addEdges();
 		conductance = conductance();
 		vertexExpansion = vertexExpansion();
 	}
+	
+	public int vertexCount()
+	{
+		return vertexCount;
+	}
 
-	public void addEdges(double probability) {
+	private void addEdges(double probability) {
 		int tries = 0;
 		boolean connected = false;
 		while (tries < maxTries && !(connected = isConnected())) {
@@ -82,6 +92,50 @@ public class Graph {
 		}
 		if (!connected)
 			addEdges(probability + 0.1);
+	}
+	
+	private void addEdges()
+	{
+		while (!isConnected())
+		{
+			clearEdges();
+			if (regular)
+				regularEdges(Graph.regularDegree);
+			else
+				addEdges(edgeProbability);
+		}
+	}
+	
+	private void regularEdges(int r) {
+		if (r * vertexCount % 2 != 0)
+			throw new IllegalArgumentException("Graph is not constructible");
+		int maxtry = 4;
+		for (Vertex v : graph.getVertices()) {
+			int tries = 0;
+			int degree = graph.degree(v);
+			while (degree < r) {
+				int chosen = rand.nextInt(vertexCount);
+				Vertex w = vertices.get(chosen);
+				boolean isNeighboor = graph.isNeighbor(v, w);
+				int otherDegree = graph.degree(w);
+				if (!v.equals(w) && !isNeighboor && otherDegree < r) {
+					graph.addEdge(v.getLabel() + w.getLabel(), v, w);
+					degree++;
+				}
+				else
+					tries++;
+				if (tries == maxtry)
+					return;
+			}
+
+		}
+	}
+	
+	private void clearEdges()
+	{
+		graph = new UndirectedSparseGraph<>();
+		for (Vertex v : vertices)
+			graph.addVertex(v);
 	}
 
 	private boolean bernoulli(double p) {
@@ -149,9 +203,6 @@ public class Graph {
 
 	private Vertex chooseNeighboor(Vertex vertex) {
 		Collection<Vertex> neighboors = graph.getNeighbors(vertex);
-		if (neighboors.size() == 0) {
-			System.out.println(vertex.getLabel() + " izolalt");
-		}
 		int chosen = rand.nextInt(neighboors.size());
 		Iterator<Vertex> it = neighboors.iterator();
 		while (chosen > 0) {

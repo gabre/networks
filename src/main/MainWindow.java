@@ -35,8 +35,8 @@ public class MainWindow {
 	private static final int CHANNEL_CAPACITY = 10;
 	
 	public MainWindow() {
-		int vertexCount = 15;
-		graph = new Graph(vertexCount);
+		int vertexCount = 20;
+		graph = new Graph(vertexCount, true);
 		history = new LinkedList<>();
 		history.add(graph);
 		current = 0;
@@ -126,6 +126,7 @@ public class MainWindow {
 	private void startGenerator()
 	{
 		Thread t = new Thread(generator);
+		t.setDaemon(true);
 		t.start();
 	}
 	
@@ -150,7 +151,11 @@ public class MainWindow {
 	{
 		if (current == history.size() - 1)
 		{
-			graph = channel.remove();
+			try {
+				graph = channel.take();
+			} catch (InterruptedException e) {
+				
+			}
 			history.add(graph);
 		}
 		else
