@@ -4,10 +4,12 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
@@ -26,12 +28,12 @@ public class Graph {
 	private List<Vertex> vertices;
 	private Set<Vertex> vertexSet;
 	private final double conductance, vertexExpansion;
-	private static final double edgeProbability = 0.1;
-	private static final int maxTries = 3;
 	private static final Dimension DISPLAY_SIZE = new Dimension(500, 500);
 	private static int vertexCount;
 	private static boolean regular;
 	private static int regularDegree;
+	private static double rho;
+	private static Map<Vertex, Integer> minDegrees, maxDegrees;
 
 	public Graph(int n, boolean regular) {
 		if (n > 25)
@@ -50,6 +52,7 @@ public class Graph {
 			vertexSet.add(v);
 		}
 		Graph.regularDegree = 2;
+		minMaxDegrees();
 		addEdges();
 		informInitialVertex();
 		conductance = conductance();
@@ -87,21 +90,28 @@ public class Graph {
 		return Graph.regularDegree;
 	}
 
-	private void addEdges(double probability) {
-		int tries = 0;
-		boolean connected = false;
-		while (tries < maxTries && !(connected = isConnected())) {
-			for (Vertex v : graph.getVertices()) {
-				for (Vertex w : graph.getVertices()) {
-					if (!v.equals(w) && !graph.isNeighbor(v, w)
-							&& bernoulli(probability))
-						graph.addEdge(v.getLabel() + w.getLabel(), v, w);
-				}
+	private boolean addMinMaxEdges() {
+		Set<Vertex> notSaturated = new HashSet<>(vertexSet);
+		Iterator<Vertex> it = vertexSet.iterator();
+		while (it.hasNext() && !notSaturated.isEmpty())
+		{
+			Vertex v = it.next();
+			int degree = graph.degree(v);
+			Set<Vertex> potentialNeighboors = new HashSet<>(notSaturated);
+			potentialNeighboors.remove(v);
+			while (degree < minDegrees.get(v))
+			{
+				Vertex w = getOne(potentialNeighboors);
+				graph.addEdge(v.getLabel() + w.getLabel(), v, w);
+				degree++;
+				if (graph.degree(w) == maxDegrees.get(w))
+					notSaturated.remove(w);
 			}
-			tries++;
 		}
-		if (!connected)
-			addEdges(probability + 0.1);
+		if (it.hasNext())
+			return false;
+		return true;
+		
 	}
 	
 	private void addEdges()
@@ -110,15 +120,25 @@ public class Graph {
 		while (!connected)
 		{			
 			if (regular)
-				regularEdges(Graph.regularDegree);
+				while (!regularEdges(Graph.regularDegree));
 			else
-				addEdges(edgeProbability);
+			{
+				while(!addMinMaxEdges());
+				minMaxDegrees();
+			}
 			if (!(connected = isConnected()))
+			{
 				clearEdges();
+			}
 		}
 	}
-	
-	private void regularEdges(int r) {
+
+	/**
+	 * Adds edges to the graph to make it r-regular.
+	 * @param r degree of all vertices in the graph
+	 * @return true if succeed, false otherwise
+	 */
+	private boolean regularEdges(int r) {
 		if (vertexCount <= r || r * vertexCount % 2 != 0)
 			throw new IllegalArgumentException("Graph is not constructible");
 		Set<Vertex> notSaturated = new HashSet<>(vertexSet);
@@ -129,8 +149,7 @@ public class Graph {
 			Set<Vertex> neighboors = new HashSet<>(graph.getNeighbors(v));
 			Set<Vertex> potentialNeighboors = Sets.difference(notSaturated, neighboors);
 			while (degree < r && potentialNeighboors.size() > 0) {
-				int chosen = rand.nextInt(potentialNeighboors.size());
-				Vertex w = get(potentialNeighboors, chosen);
+				Vertex w = getOne(potentialNeighboors);
 				int otherDegree = graph.degree(w);
 				graph.addEdge(v.getLabel() + w.getLabel(), v, w);
 				degree++;
@@ -138,20 +157,20 @@ public class Graph {
 					notSaturated.remove(w);
 					potentialNeighboors.remove(w);
 				}
-
 			}
 			if (degree < r)
-				return;
-
+				return false;
 		}
+		return true;
 	}
 	
-	private Vertex get(Set<Vertex> s, int i)
+	private Vertex getOne(Set<Vertex> s)
 	{
+		int chosen = rand.nextInt(s.size());
 		Iterator<Vertex> it = s.iterator();
-		while (i > 0) {
+		while (chosen > 0) {
 			it.next();
-			i--;
+			chosen--;
 		}
 		return it.next();
 	}
@@ -162,9 +181,22 @@ public class Graph {
 		for (Vertex v : vertices)
 			graph.addVertex(v);
 	}
-
-	private boolean bernoulli(double p) {
-		return rand.nextDouble() < p;
+	
+	private void minMaxDegrees()
+	{
+		rho = 0;
+		minDegrees = new HashMap<>(vertexCount());
+		maxDegrees = new HashMap<>(vertexCount);
+		for (Vertex v : vertices)
+		{
+			int min = rand.nextInt((int)((double)vertexCount / 2.0));
+			int max = rand.nextInt((int)((double)vertexCount / 2.0) - 1) + (int)(vertexCount / 2.0);
+			minDegrees.put(v, min);
+			maxDegrees.put(v, max);
+			double ratio = (double)max / (double)min;
+			if (ratio > rho)
+				rho = ratio;
+		}
 	}
 
 	public Component getViewer() {
