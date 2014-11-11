@@ -96,21 +96,33 @@ public class Graph {
 		{
 			Vertex v = it.next();
 			int degree = graph.degree(v);
-			Set<Vertex> potentialNeighboors = new HashSet<>(notSaturated);
-			potentialNeighboors.remove(v);
-			while (degree < minDegrees.get(v))
-			{
-				Vertex w = getOne(potentialNeighboors);
-				graph.addEdge(v.getLabel() + w.getLabel(), v, w);
-				degree++;
-				if (graph.degree(w) == maxDegrees.get(w))
-					notSaturated.remove(w);
+			if (degree < minDegrees.get(v)) {
+				Set<Vertex> potentialNeighboors = new HashSet<>();
+				Set<Vertex> neighboors = new HashSet<>(graph.getNeighbors(v));
+				Set<Vertex> notNeighBoors = Sets.difference(vertexSet,
+						neighboors);
+				Sets.intersection(notSaturated, notNeighBoors).copyInto(
+						potentialNeighboors);
+				potentialNeighboors.remove(v);
+				while (degree < minDegrees.get(v)) {
+					Vertex w = getOne(potentialNeighboors);
+					addEdge(v, w);
+					degree++;
+					potentialNeighboors.remove(w);
+					if (graph.degree(w) == maxDegrees.get(w))
+						notSaturated.remove(w);
+				}
 			}
 		}
 		if (it.hasNext())
 			return false;
 		return true;
 		
+	}
+	
+	private boolean addEdge(Vertex v, Vertex w)
+	{
+		return graph.addEdge(v.getLabel() + " " + w.getLabel(), v, w);
 	}
 	
 	private void addEdges()
@@ -125,26 +137,25 @@ public class Graph {
 			{
 				while(!addMinMaxEdges())
 					clearEdges();
-				minMaxDegrees();
 			}
 			if (!(connected = isConnected()))
 			{
 				clearEdges();
 			}
 		}
-		//check();
+		check();
 	}
 	
 	private void check()
 	{
 		for (Vertex v : vertices)
 		{
-			//if (graph.degree(v) > maxDegrees.get(v))
-				//System.out.println(v.getLabel() + ": nagy a fokszám");
-			// if (graph.degree(v) < minDegrees.get(v))
-				//System.out.println(v.getLabel() + ": kicsi a fokszám");
-			if (graph.degree(v) != regularDegree)
-				System.out.println("AJAJ " + v.getLabel() + " foka: " + graph.degree(v));
+			if (graph.degree(v) > maxDegrees.get(v))
+				System.out.println(v.getLabel() + ": nagy a fokszám");
+			 if (graph.degree(v) < minDegrees.get(v))
+				System.out.println(v.getLabel() + ": kicsi a fokszám: " + graph.degree(v) + " " + minDegrees.get(v) + " helyett");
+//			if (graph.degree(v) != regularDegree)
+//				System.out.println("AJAJ " + v.getLabel() + " foka: " + graph.degree(v));
 		}
 	}
 
@@ -167,7 +178,7 @@ public class Graph {
 			Sets.intersection(notSaturated, notNeighboors).copyInto(potentialNeighboors);
 			while (degree < r && potentialNeighboors.size() > 0) {
 				Vertex w = getOne(potentialNeighboors);
-				graph.addEdge(v.getLabel() + w.getLabel(), v, w);
+				addEdge(v, w);
 				int otherDegree = graph.degree(w);
 				degree++;
 				potentialNeighboors.remove(w);
