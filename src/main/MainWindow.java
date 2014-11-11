@@ -26,7 +26,7 @@ public class MainWindow {
 	private int current;
 	private JFrame window;
 	private JButton next, prev, spread;
-	private JLabel counter, conductance, expansion;
+	private JLabel counter, conductance, expansion, prediction, probability;
 	private NumberFormat doubleFormat;
 	private GraphGenerator generator;
 	private BlockingQueue<Graph> channel;
@@ -120,6 +120,12 @@ public class MainWindow {
 		
 		expansion = new JLabel();
 		place.add(expansion);
+		
+		prediction = new JLabel();
+		place.add(prediction);
+		
+		probability = new JLabel();
+		place.add(probability);
 		return place;
 	}
 	
@@ -180,5 +186,7 @@ public class MainWindow {
 		counter.setText("Graphs: " + (current + 1) + " / " + history.size());
 		conductance.setText("Conductance: " + doubleFormat.format(graph.getConductance()));
 		expansion.setText("Expansion: " + doubleFormat.format(graph.getExpansion()));
+		prediction.setText("Expected: " + generator.getGuessExpansion() + ". round");
+		probability.setText("Probability > " + doubleFormat.format(generator.probability));
 	}
 }

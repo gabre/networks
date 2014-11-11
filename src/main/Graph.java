@@ -36,22 +36,21 @@ public class Graph {
 	private static Map<Vertex, Integer> minDegrees, maxDegrees;
 
 	public Graph(int n, boolean regular) {
-		if (n > 25)
-			throw new IllegalArgumentException();
 		vertexCount = n;
 		Graph.regular = regular;
 		graph = new UndirectedSparseGraph<>();
 		vertices = new ArrayList<>(n);
 		vertexSet = new HashSet<>();
 
-		char c = 'A';
+		int c = 1;
+		//char c = 'A';
 		for (int i = 0; i < n; i++, c++) {
-			Vertex v = new Vertex(Character.toString(c));
+			Vertex v = new Vertex(Integer.toString(c));
 			graph.addVertex(v);
 			vertices.add(v);
 			vertexSet.add(v);
 		}
-		Graph.regularDegree = 2;
+		Graph.regularDegree = 6;
 		minMaxDegrees();
 		addEdges();
 		informInitialVertex();
@@ -117,8 +116,11 @@ public class Graph {
 	private void addEdges()
 	{
 		boolean connected = false;
+		int maxtry = 6;
+		int tries = 0;
 		while (!connected)
 		{			
+			tries++;
 			if (regular)
 				while (!regularEdges(Graph.regularDegree));
 			else
@@ -129,7 +131,25 @@ public class Graph {
 			if (!(connected = isConnected()))
 			{
 				clearEdges();
+				if (tries == maxtry)
+					try {
+						tries = 0;
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 			}
+		}
+		//check();
+	}
+	
+	private void check()
+	{
+		for (Vertex v : vertices)
+		{
+			if (graph.degree(v) > maxDegrees.get(v))
+				System.out.println(v.getLabel() + ": nagy fokszám");
 		}
 	}
 
@@ -159,8 +179,12 @@ public class Graph {
 				}
 			}
 			if (degree < r)
+			{
+				System.out.println("failure");
 				return false;
+			}
 		}
+		System.out.println("success");
 		return true;
 	}
 	
