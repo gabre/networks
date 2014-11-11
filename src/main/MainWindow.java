@@ -30,15 +30,20 @@ public class MainWindow {
 	private NumberFormat doubleFormat;
 	private GraphGenerator generator;
 	private BlockingQueue<Graph> channel;
+	private final boolean regular;
+	private final int vertexCount;
 
 	private static final Dimension WINDOW_SIZE = new Dimension(730, 560);
 	private static final int CHANNEL_CAPACITY = 10;
 	
-	public MainWindow(Integer vertexCount, boolean regular) {
-		graph = new Graph(vertexCount, regular);
-		history = new LinkedList<>();
-		history.add(graph);
-		current = 0;
+	public MainWindow(int vertexCount_, boolean regular_) {
+		vertexCount = vertexCount_;
+		regular = regular_;
+		firstGraph();
+		
+		initGenerator();
+		startGenerator();
+		
 		doubleFormat = new DecimalFormat("#0.0000");
 
 		window = new JFrame("Rumour spreading");
@@ -48,10 +53,6 @@ public class MainWindow {
 		center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
 
 		visualizer = graph.getViewer();
-
-		channel = new LinkedBlockingQueue<>(CHANNEL_CAPACITY);
-		generator = new GraphGenerator(channel, graph);
-		startGenerator();
 		
 		window.setPreferredSize(WINDOW_SIZE);
 		center.add(visualizer);	
@@ -64,6 +65,29 @@ public class MainWindow {
 		
 		window.pack();
 		window.setVisible(true);
+	}
+	
+	private void firstGraph()
+	{
+		graph = new Graph(vertexCount, regular);
+		history = new LinkedList<>();
+		history.add(graph);
+		current = 0;
+	}
+	
+	private void initGenerator()
+	{
+		channel = new LinkedBlockingQueue<>(CHANNEL_CAPACITY);
+		generator = new GraphGenerator(channel, graph);
+	}
+	
+	private void restart()
+	{
+		stopGenerator();
+		firstGraph();
+		initGenerator();
+		startGenerator();
+		graph.visualize(visualizer);
 	}
 	
 	private JPanel buttons()
@@ -133,6 +157,12 @@ public class MainWindow {
 		Thread t = new Thread(generator);
 		t.setDaemon(true);
 		t.start();
+	}
+	
+	private void stopGenerator()
+	{
+		generator.needToStop.set(true);
+		channel.clear();
 	}
 	
 	private void spread() {
