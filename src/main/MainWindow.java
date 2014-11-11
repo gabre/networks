@@ -34,9 +34,8 @@ public class MainWindow {
 	private static final Dimension WINDOW_SIZE = new Dimension(730, 560);
 	private static final int CHANNEL_CAPACITY = 10;
 	
-	public MainWindow() {
-		int vertexCount = 20;
-		graph = new Graph(vertexCount, true);
+	public MainWindow(Integer vertexCount, boolean regular) {
+		graph = new Graph(vertexCount, regular);
 		history = new LinkedList<>();
 		history.add(graph);
 		current = 0;
