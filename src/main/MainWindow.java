@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -25,7 +26,7 @@ public class MainWindow {
 	private List<Graph> history;
 	private int current;
 	private JFrame window;
-	private JButton next, prev, spread;
+	private JButton next, prev, spread, restart;
 	private JLabel counter, conductance, expansion, prediction, probability;
 	private NumberFormat doubleFormat;
 	private GraphGenerator generator;
@@ -88,6 +89,8 @@ public class MainWindow {
 		initGenerator();
 		startGenerator();
 		graph.visualize(visualizer);
+		toggleButtons();
+		setInformation();
 	}
 	
 	private JPanel buttons()
@@ -122,9 +125,20 @@ public class MainWindow {
 			}
 		});
 		
+		restart = new JButton("Restart");
+		restart.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				restart();
+			}
+		});
+		
 		place.add(prev);
 		place.add(next);
 	//	place.add(spread);
+		place.add(Box.createRigidArea(new Dimension(50,0)));
+		place.add(restart);
 		
 		return place;
 		
