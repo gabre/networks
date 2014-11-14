@@ -146,24 +146,24 @@ public class Graph {
 		check();
 	}
 	
-	private void check()
-	{
-		for (Vertex v : vertices)
- {
-			if (regular)
-			{
-				if (graph.degree(v) > maxDegrees.get(v))
-					System.out.println(v.getLabel() + ": nagy a fokszám");
-			} else {
-				if (graph.degree(v) < minDegrees.get(v))
-					System.out.println(v.getLabel() + ": kicsi a fokszám: "
-							+ graph.degree(v) + " " + minDegrees.get(v)
-							+ " helyett");
+	private void check() {
+		if (regular)
+			for (Vertex v : vertices) {
 				if (graph.degree(v) != regularDegree)
 					System.out.println("AJAJ " + v.getLabel() + " foka: "
 							+ graph.degree(v));
 			}
-		}
+		else
+			for (Vertex v : vertices)
+				if (graph.degree(v) > maxDegrees.get(v)) {
+					System.out.println(v.getLabel() + ": nagy a fokszám");
+				} else {
+					if (graph.degree(v) < minDegrees.get(v))
+						System.out.println(v.getLabel() + ": kicsi a fokszám: "
+								+ graph.degree(v) + " " + minDegrees.get(v)
+								+ " helyett");
+
+				}
 	}
 
 	/**
