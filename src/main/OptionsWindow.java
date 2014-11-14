@@ -21,8 +21,6 @@ import java.awt.event.ActionListener;
 import javax.swing.Action;
 
 public class OptionsWindow extends JFrame {
-
-	private static final Integer MAX_VERTEX_COUNT = 25;
 	private JPanel contentPane;
 	private JTextField textField;
 	JRadioButton rdbtnDioButton01;
@@ -95,19 +93,29 @@ public class OptionsWindow extends JFrame {
 	}
 
 	protected void runMainWindow() {
-		Integer parsed = Integer.parseInt(textField.getText());
-		if(parsed == null || parsed >= MAX_VERTEX_COUNT || parsed < 1) {
+		try {
+			int parsed = Integer.parseInt(textField.getText());
+			if(parsed < 1) {
+				JOptionPane.showMessageDialog(this,
+					    "The number of nodes should be positive integer",
+					    "Argument error",
+					    JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			
+			boolean regular = true;
+			if(rdbtnDioButton01.isSelected()) {
+				regular = false;
+			}
+			new MainWindow(parsed, regular);
+		}
+		catch (NumberFormatException e)
+		{
 			JOptionPane.showMessageDialog(this,
-				    "The number of nodes should be between 1 and 24",
+				    "The number of nodes should be positive integer",
 				    "Argument error",
 				    JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-		
-		boolean regular = true;
-		if(rdbtnDioButton01.isSelected()) {
-			regular = false;
-		}
-		new MainWindow(parsed, regular);
+		}		 
+
 	}
 }
