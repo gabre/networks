@@ -27,9 +27,7 @@ public class Program {
 		
 		SwingUtilities.invokeLater(new Runnable() {
 		    public void run() {
-		    	new OptionsWindow();
-		    	// new MainWindow(16, true);
-		    }
+		    	new OptionsWindow();		    }
 		});		
 		
 	}

@@ -22,7 +22,7 @@ public class GraphGenerator implements Runnable {
 		conductance = expansion = 0;
 		predictionConductance = new AtomicInteger(PRED_DEFAULT);
 		predictionExpansion = new AtomicInteger(PRED_DEFAULT);
-		double beta = 1;
+		double beta = 2;
 		probability = 1 - Math.pow(template.vertexCount(), -beta);
 		System.out.println("prob: " + probability);
 		logn = Math.log(template.vertexCount());
@@ -30,8 +30,8 @@ public class GraphGenerator implements Runnable {
 		if (template.isRegular())
 		{
 			double logd = Math.log(template.degrees());
-			double c = 2;
-			expansionLowerBound = c * beta * Math.pow(logn, 2) * Math.pow(logd, 1);
+			double c = 0.018;
+			expansionLowerBound = c * beta * Math.pow(logn, 4) * Math.pow(logd, 2);
 			System.out.println("lower bound: " + expansionLowerBound);
 		}
 		needToStop = new AtomicBoolean(false);
