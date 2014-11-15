@@ -24,10 +24,12 @@ public class Program {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		// ok: nem regularis: 20,15 csucs beta = 1, 0.5-re
+		//     regularis (csucs, fokszam): (15,4), (20,4) beta = 1-re
 		SwingUtilities.invokeLater(new Runnable() {
 		    public void run() {
-		    	new OptionsWindow();		    }
+		    	new OptionsWindow();	
+		    }
 		});		
 		
 	}

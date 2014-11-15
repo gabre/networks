@@ -110,6 +110,11 @@ public class Graph {
 		return Graph.regularDegree;
 	}
 
+	public double rho()
+	{
+		return rho;
+	}
+	
 	private boolean addMinMaxEdges() {
 		Set<Vertex> notSaturated = new HashSet<>(vertexSet);
 		Iterator<Vertex> it = vertexSet.iterator();
@@ -117,7 +122,8 @@ public class Graph {
 		{
 			Vertex v = it.next();
 			int degree = graph.degree(v);
-			if (degree < minDegrees.get(v)) {
+			int min = minDegrees.get(v);
+			if (degree < min) {
 				Set<Vertex> potentialNeighboors = new HashSet<>();
 				Set<Vertex> neighboors = new HashSet<>(graph.getNeighbors(v));
 				Set<Vertex> notNeighBoors = Sets.difference(vertexSet,
@@ -125,7 +131,7 @@ public class Graph {
 				Sets.intersection(notSaturated, notNeighBoors).copyInto(
 						potentialNeighboors);
 				potentialNeighboors.remove(v);
-				while (degree < minDegrees.get(v)) {
+				while (degree < min) {
 					Vertex w = getOne(potentialNeighboors);
 					addEdge(v, w);
 					degree++;
@@ -133,6 +139,8 @@ public class Graph {
 					if (graph.degree(w) == maxDegrees.get(w))
 						notSaturated.remove(w);
 				}
+				if (degree == maxDegrees.get(v))
+					notSaturated.remove(v);
 			}
 		}
 		if (it.hasNext())
@@ -143,7 +151,10 @@ public class Graph {
 	
 	private boolean addEdge(Vertex v, Vertex w)
 	{
-		return graph.addEdge(v.getLabel() + " " + w.getLabel(), v, w);
+		boolean result = graph.addEdge(v.getLabel() + " " + w.getLabel(), v, w);
+		if (!result)
+			System.out.println("jajaj: " + v + " és " + w + " között már fut él");
+		return result;
 	}
 	
 	private void addEdges()
@@ -177,12 +188,11 @@ public class Graph {
 		else
 			for (Vertex v : vertices)
 				if (graph.degree(v) > maxDegrees.get(v)) {
-					System.out.println(v.getLabel() + ": nagy a fokszám");
+					System.out.println(v.getLabel() + ": nagy a fokszám: " + maxDegrees.get(v) + " helyett " + graph.degree(v));
 				} else {
 					if (graph.degree(v) < minDegrees.get(v))
 						System.out.println(v.getLabel() + ": kicsi a fokszám: "
-								+ graph.degree(v) + " " + minDegrees.get(v)
-								+ " helyett");
+								+ minDegrees.get(v) + " helyett " + graph.degree(v));
 
 				}
 	}
@@ -261,8 +271,14 @@ public class Graph {
 		maxDegrees = new HashMap<>(vertexCount);
 		for (Vertex v : vertices)
 		{
-			int min = rand.nextInt((int)((double)vertexCount / 2.0));
-			int max = rand.nextInt((int)((double)vertexCount / 2.0) - 1) + (int)(vertexCount / 2.0);
+			int min = 0, max = 0;
+			boolean valid = false;
+			while (!valid)
+			{
+				min = rand.nextInt((int)((double)vertexCount / 5.0)) + 1;
+				max = rand.nextInt((int)((double)vertexCount / 2.0)) + (int)(vertexCount / 4.0);
+				valid = min <= max;
+			}
 			minDegrees.put(v, min);
 			maxDegrees.put(v, max);
 			double ratio = (double)max / (double)min;

@@ -1,8 +1,5 @@
 package main;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -14,11 +11,8 @@ import javax.swing.JRadioButton;
 import java.awt.Cursor;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
-import javax.swing.AbstractAction;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import javax.swing.Action;
 
 public class OptionsWindow extends JFrame {
 	private JPanel contentPane;
@@ -98,7 +92,7 @@ public class OptionsWindow extends JFrame {
 		
 		// remove to be parsable by window designer
 		this.setVisible(true);
-		this.show();
+		//this.show();
 	}
 
 	protected void runMainWindow() {

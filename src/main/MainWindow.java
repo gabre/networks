@@ -36,7 +36,7 @@ public class MainWindow {
 	private final int vertexCount;
 
 	private static final Dimension WINDOW_SIZE = new Dimension(730, 560);
-	private static final int CHANNEL_CAPACITY = 10;
+	private static final int CHANNEL_CAPACITY = 3;
 	
 	public MainWindow(int vertexCount_) {
 		vertexCount = vertexCount_;
@@ -193,13 +193,13 @@ public class MainWindow {
 		place.add(conductance);
 		
 		expansion = new JLabel();
-		place.add(expansion);
-		
-		prediction = new JLabel();
-		place.add(prediction);
+		place.add(expansion);		
 		
 		probability = new JLabel();
 		place.add(probability);
+		
+		prediction = new JLabel();
+		place.add(prediction);
 		return place;
 	}
 	
@@ -266,7 +266,7 @@ public class MainWindow {
 		counter.setText("Graphs: " + (current + 1) + " / " + history.size());
 		conductance.setText("Conductance: " + doubleFormat.format(graph.getConductance()));
 		expansion.setText("Expansion: " + doubleFormat.format(graph.getExpansion()));
-		prediction.setText("Expected: " + generator.getGuessExpansion() + ". round");
-		probability.setText("Probability > " + doubleFormat.format(generator.probability));
+		prediction.setText("All informed: at the end of round " + generator.getGuess());
+		probability.setText("With probability = " + doubleFormat.format(generator.probability));
 	}
 }
