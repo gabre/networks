@@ -35,23 +35,32 @@ public class Graph {
 	private static double rho;
 	private static Map<Vertex, Integer> minDegrees, maxDegrees;
 
-	public Graph(int n, boolean regular) {
+	public Graph(int n) {
 		vertexCount = n;
-		Graph.regular = regular;
+		Graph.regular = false;
 		graph = new UndirectedSparseGraph<>();
 		vertices = new ArrayList<>(n);
 		vertexSet = new HashSet<>();
 
-		int c = 1;
-		//char c = 'A';
-		for (int i = 0; i < n; i++, c++) {
-			Vertex v = new Vertex(Integer.toString(c));
-			graph.addVertex(v);
-			vertices.add(v);
-			vertexSet.add(v);
-		}
-		Graph.regularDegree = 4;
+		createNodes(n);
+		
 		minMaxDegrees();
+		addEdges();
+		informInitialVertex();
+		conductance = conductance();
+		vertexExpansion = vertexExpansion();
+	}
+	
+	public Graph(int n, int degree) {
+		vertexCount = n;
+		Graph.regular = true;
+		graph = new UndirectedSparseGraph<>();
+		vertices = new ArrayList<>(n);
+		vertexSet = new HashSet<>();
+
+		createNodes(n);
+		
+		Graph.regularDegree = degree;
 		addEdges();
 		informInitialVertex();
 		conductance = conductance();
@@ -72,6 +81,18 @@ public class Graph {
 		addEdges();
 		conductance = conductance();
 		vertexExpansion = vertexExpansion();
+	}
+	
+	private void createNodes(int n)
+	{
+		int c = 1;
+		//char c = 'A';
+		for (int i = 0; i < n; i++, c++) {
+			Vertex v = new Vertex(Integer.toString(c));
+			graph.addVertex(v);
+			vertices.add(v);
+			vertexSet.add(v);
+		}
 	}
 	
 	public int vertexCount()

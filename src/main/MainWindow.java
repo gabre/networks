@@ -32,14 +32,48 @@ public class MainWindow {
 	private GraphGenerator generator;
 	private BlockingQueue<Graph> channel;
 	private final boolean regular;
+	private final int regularDegree;
 	private final int vertexCount;
 
 	private static final Dimension WINDOW_SIZE = new Dimension(730, 560);
 	private static final int CHANNEL_CAPACITY = 10;
 	
-	public MainWindow(int vertexCount_, boolean regular_) {
+	public MainWindow(int vertexCount_) {
 		vertexCount = vertexCount_;
-		regular = regular_;
+		regular = false;
+		regularDegree = 0;
+		firstGraph();
+		
+		initGenerator();
+		startGenerator();
+		
+		doubleFormat = new DecimalFormat("#0.0000");
+
+		window = new JFrame("Rumour spreading");
+		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		JPanel center = new JPanel();
+		center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
+
+		visualizer = graph.getViewer();
+		
+		window.setPreferredSize(WINDOW_SIZE);
+		center.add(visualizer);	
+		center.add(buttons());
+		
+		window.add(center, BorderLayout.CENTER);
+		window.add(information(), BorderLayout.LINE_END);
+		setInformation();
+		toggleButtons();
+		
+		window.pack();
+		window.setVisible(true);
+	}
+	
+	public MainWindow(int vertexCount_, int degree) {
+		vertexCount = vertexCount_;
+		regular = true;
+		regularDegree = degree;
 		firstGraph();
 		
 		initGenerator();
@@ -70,7 +104,10 @@ public class MainWindow {
 	
 	private void firstGraph()
 	{
-		graph = new Graph(vertexCount, regular);
+		if (regular)
+			graph = new Graph(vertexCount, regularDegree);
+		else
+			graph = new Graph(vertexCount);
 		history = new LinkedList<>();
 		history.add(graph);
 		current = 0;

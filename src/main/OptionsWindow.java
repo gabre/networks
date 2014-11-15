@@ -22,7 +22,7 @@ import javax.swing.Action;
 
 public class OptionsWindow extends JFrame {
 	private JPanel contentPane;
-	private JTextField textField;
+	private JTextField textField, degreeField;
 	JRadioButton rdbtnDioButton01;
 	JRadioButton rdbtnDioButton02;
 
@@ -47,30 +47,39 @@ public class OptionsWindow extends JFrame {
 		contentPane.add(textField);
 		textField.setColumns(10);
 		
+		JLabel degreeLabel = new JLabel("Degree:");
+		degreeLabel.setBounds(12, 40, 151, 15);
+		contentPane.add(degreeLabel);
+		
+		degreeField = new JTextField();
+		degreeField.setBounds(165, 40, 66, 19);
+		contentPane.add(degreeField);
+		degreeField.setColumns(10);
+		
 		JLabel label = new JLabel("Demo selector:");
-		label.setBounds(12, 51, 151, 15);
+		label.setBounds(12, 75, 151, 15);
 		contentPane.add(label);
 	
 		rdbtnDioButton01 = new JRadioButton("Thesis 1.");
 		rdbtnDioButton01.setSelected(true);
-		rdbtnDioButton01.setBounds(12, 85, 307, 23);
+		rdbtnDioButton01.setBounds(12, 95, 307, 23);
 		contentPane.add(rdbtnDioButton01);
 		
 		rdbtnDioButton02 = new JRadioButton("Thesis 2.");
-		rdbtnDioButton02.setBounds(12, 210, 307, 23);
+		rdbtnDioButton02.setBounds(12, 220, 307, 23);
 		contentPane.add(rdbtnDioButton02);
 		
 		JLabel lblTheThesisIs = new JLabel("<html>The thesis is based on graph conductance. It needs a graphs with specific maximum and minimum node degree to be applicable.</html>");
 		lblTheThesisIs.setVerticalTextPosition(SwingConstants.TOP);
 		lblTheThesisIs.setVerticalAlignment(SwingConstants.TOP);
 		lblTheThesisIs.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-		lblTheThesisIs.setBounds(36, 116, 227, 75);
+		lblTheThesisIs.setBounds(36, 126, 227, 75);
 		contentPane.add(lblTheThesisIs);
 		
 		JLabel label_1 = new JLabel("<html>The thesis is based on vertex expansion. It needs K-regular graphs to be applicable.</html>");
 		label_1.setVerticalTextPosition(SwingConstants.TOP);
 		label_1.setVerticalAlignment(SwingConstants.TOP);
-		label_1.setBounds(36, 241, 227, 75);
+		label_1.setBounds(36, 251, 227, 75);
 		contentPane.add(label_1);
 		
 		JButton btnRunDemo = new JButton("Run demo");
@@ -95,27 +104,35 @@ public class OptionsWindow extends JFrame {
 	protected void runMainWindow() {
 		try {
 			int parsed = Integer.parseInt(textField.getText());
-			if(parsed < 1) {
+			if (parsed < 1) {
 				JOptionPane.showMessageDialog(this,
-					    "The number of nodes should be positive integer",
-					    "Argument error",
-					    JOptionPane.ERROR_MESSAGE);
+						"The number of nodes should be positive integer",
+						"Argument error", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
-			
-			boolean regular = true;
-			if(rdbtnDioButton01.isSelected()) {
-				regular = false;
+
+			if (rdbtnDioButton01.isSelected()) {
+				new MainWindow(parsed);
+			} else {
+				int degree = Integer.parseInt(degreeField.getText());
+				new MainWindow(parsed, degree);
 			}
-			new MainWindow(parsed, regular);
-		}
-		catch (NumberFormatException e)
+		} catch (NumberFormatException e) {
+			if (rdbtnDioButton01.isSelected()) {
+				JOptionPane.showMessageDialog(this,
+						"The number of nodes should be positive integer",
+						"Argument error", JOptionPane.ERROR_MESSAGE);
+			}
+			else
+				JOptionPane.showMessageDialog(this,
+						"The number of degrees should be positive integer",
+						"Argument error", JOptionPane.ERROR_MESSAGE);
+		} catch (IllegalArgumentException e)
 		{
 			JOptionPane.showMessageDialog(this,
-				    "The number of nodes should be positive integer",
-				    "Argument error",
-				    JOptionPane.ERROR_MESSAGE);
-		}		 
-
+					"Degree times number of nodes must be even.",
+					"Argument error", JOptionPane.ERROR_MESSAGE);
+		}
+		
 	}
 }
