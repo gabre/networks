@@ -3,8 +3,9 @@ package main;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Observable;
 
-public class GraphGenerator implements Runnable {
+public class GraphGenerator extends Observable implements Runnable {
 	private final BlockingQueue<Graph> channel;
 	private Graph template;
 	private double conductance, expansion;
@@ -14,6 +15,7 @@ public class GraphGenerator implements Runnable {
 	private double logn, expansionLowerBound, conductanceLowerBound;
 	private int generated;
 	private final int PRED_DEFAULT = 0;
+	public volatile boolean generationEnded = false;
 
 	public GraphGenerator(BlockingQueue<Graph> channel_, Graph template_)
 	{
@@ -34,7 +36,7 @@ public class GraphGenerator implements Runnable {
 		}
 		else
 		{
-			double b = 0.035 * beta;
+			double b = 0.034 * beta;
 			conductanceLowerBound = b * template.rho() * logn;
 			System.out.println("lower bound: " + conductanceLowerBound);
 		}
@@ -43,6 +45,7 @@ public class GraphGenerator implements Runnable {
 	
 	public void generate()
 	{
+		generationEnded = false;
 		while (!needToStop.get() && !template.isAllInformed())
 		{
 			Graph g = new Graph(template);
@@ -51,27 +54,41 @@ public class GraphGenerator implements Runnable {
 			template = g;
 			conductance += g.getConductance();
 			expansion += g.getExpansion();
-			if (!template.isRegular() && conductance >= conductanceLowerBound)
+			if (!template.isRegular() && conductance >= conductanceLowerBound) {
+				System.out.print("Prediction: " + Integer.toString(generated));
 				prediction.compareAndSet(PRED_DEFAULT, generated);
-			if (template.isRegular() && expansion >= expansionLowerBound)
-				prediction.compareAndSet(PRED_DEFAULT, generated);			
+			}
+			if (template.isRegular() && expansion >= expansionLowerBound) {
+				System.out.print("Prediction: " + Integer.toString(generated));
+				prediction.compareAndSet(PRED_DEFAULT, generated);		
+			}
 			try {
 				channel.put(g);
+			    setChanged();
+			    notifyObservers();
 			} catch (InterruptedException e) {
 				return;
 			}
 		}
+		generationEnded = true;
 		if (!template.isRegular() && conductance < conductanceLowerBound)
 		{
+			System.out.print("Prediction");
 			double avg = conductance / generated;
 			double tau = (int)((conductanceLowerBound - conductance) / avg) + generated;
 			prediction.compareAndSet(PRED_DEFAULT, (int)tau);
+		    setChanged();
+		    notifyObservers();
 		}
 		if (template.isRegular() && expansion < expansionLowerBound)
 		{
+			System.out.print("Prediction");
+
 			double avg = expansion / generated;
 			double tau = (int)((expansionLowerBound - expansion)/ avg) + generated;
 			prediction.compareAndSet(PRED_DEFAULT, (int)tau);
+		    setChanged();
+		    notifyObservers();
 		}
 	}
 	

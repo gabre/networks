@@ -9,6 +9,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Observable;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -19,8 +20,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import java.util.Observer;
 
-public class MainWindow {
+public class MainWindow implements Observer {
 	private Graph graph;
 	private Component visualizer;
 	private List<Graph> history;
@@ -36,7 +38,7 @@ public class MainWindow {
 	private final int vertexCount;
 
 	private static final Dimension WINDOW_SIZE = new Dimension(730, 560);
-	private static final int CHANNEL_CAPACITY = 3;
+	private static final int CHANNEL_CAPACITY = 10;
 	
 	public MainWindow(int vertexCount_) {
 		vertexCount = vertexCount_;
@@ -117,6 +119,7 @@ public class MainWindow {
 	{
 		channel = new LinkedBlockingQueue<>(CHANNEL_CAPACITY);
 		generator = new GraphGenerator(channel, graph);
+		generator.addObserver(this);
 	}
 	
 	private void restart()
@@ -268,5 +271,12 @@ public class MainWindow {
 		expansion.setText("Expansion: " + doubleFormat.format(graph.getExpansion()));
 		prediction.setText("All informed: at the end of round " + generator.getGuess());
 		probability.setText("With probability = " + doubleFormat.format(generator.probability));
+	}
+
+	@Override
+	public void update(Observable arg0, Object arg1) {
+		// TODO Auto-generated method stub
+		GraphGenerator gen = ((GraphGenerator)arg0);
+		setInformation();
 	}
 }
