@@ -56,15 +56,15 @@ public class GraphGenerator extends Observable implements Runnable {
 			g.spreadRumor();
 			generated++;
 			template = g;
-			if (template.isRegular())
+			if (!template.isRegular())
 			{
 				conductance += g.getConductance();
-				sum.getAndAdd(conductance);
+				sum.set(conductance);
 			}
 			else
 			{
 				expansion += g.getExpansion();
-				sum.getAndAdd(expansion);
+				sum.set(expansion);
 			}
 			if (!template.isRegular() && conductance >= conductanceLowerBound) {
 				System.out.print("Prediction: " + Integer.toString(generated));
@@ -86,17 +86,21 @@ public class GraphGenerator extends Observable implements Runnable {
 		if (!template.isRegular() && conductance < conductanceLowerBound)
 		{
 			System.out.print("Prediction");
-			double avg = sum.get() / generated;
-			double tau = (int)((conductanceLowerBound - conductance) / avg) + generated;
+			double avg = conductance / generated;
+			int missingRounds = (int)((conductanceLowerBound - conductance) / avg);
+			double tau = missingRounds + generated;
 			prediction.compareAndSet(PRED_DEFAULT, (int)tau);
+			sum.addAndGet(missingRounds * avg);
 		}
 		if (template.isRegular() && expansion < expansionLowerBound)
 		{
 			System.out.print("Prediction");
 
-			double avg = sum.get() / generated;
-			double tau = (int)((expansionLowerBound - expansion)/ avg) + generated;
+			double avg = expansion / generated;
+			int missingRounds = (int)((expansionLowerBound - expansion)/ avg);
+			double tau = missingRounds + generated;
 			prediction.compareAndSet(PRED_DEFAULT, (int)tau);
+			sum.addAndGet(missingRounds * avg); 
 		}
 	    setChanged();
 	    notifyObservers();
