@@ -24,7 +24,8 @@ public class GraphGenerator extends Observable implements Runnable {
 	{
 		channel = channel_;
 		template = template_;
-		conductance = expansion = 0;
+		conductance = template.getConductance();
+		expansion = template.getExpansion();
 		prediction = new AtomicInteger(PRED_DEFAULT);
 		sum = new AtomicDouble();
 		double beta = 1;
@@ -56,12 +57,12 @@ public class GraphGenerator extends Observable implements Runnable {
 			g.spreadRumor();
 			generated++;
 			template = g;
-			if (!template.isRegular())
+			if (!template.isRegular() && conductance < conductanceLowerBound)
 			{
 				conductance += g.getConductance();
 				sum.set(conductance);
 			}
-			else
+			if (template.isRegular() && expansion < expansionLowerBound)
 			{
 				expansion += g.getExpansion();
 				sum.set(expansion);
