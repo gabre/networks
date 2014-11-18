@@ -40,6 +40,7 @@ public class OptionsWindow extends JFrame {
 		
 		textField = new JTextField();
 		textField.setBounds(165, 10, 66, 19);
+		textField.setText("10");
 		contentPane.add(textField);
 		textField.setColumns(10);
 		
@@ -49,6 +50,7 @@ public class OptionsWindow extends JFrame {
 		
 		degreeField = new JTextField();
 		degreeField.setBounds(131, 300, 66, 19);
+		degreeField.setText("2");
 		contentPane.add(degreeField);
 		degreeField.setColumns(10);
 		

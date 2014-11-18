@@ -103,6 +103,10 @@ public class GraphGenerator extends Observable implements Runnable {
 			prediction.compareAndSet(PRED_DEFAULT, (int)tau);
 			sum.addAndGet(missingRounds * avg); 
 		}
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+		}
 	    setChanged();
 	    notifyObservers();
 	}
