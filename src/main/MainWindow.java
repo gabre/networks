@@ -39,7 +39,8 @@ public class MainWindow implements Observer {
 	private final int regularDegree;
 	private final int vertexCount;
 	private final float parameter;
-	private JLabel formula;
+	private JLabel formula, sum;
+	private String sumTemplate;
 
 	private static final Dimension WINDOW_SIZE = new Dimension(1500,1000);
 	private static final int CHANNEL_CAPACITY = 10;
@@ -238,9 +239,12 @@ public class MainWindow implements Observer {
 		prediction.setBorder(b);
 		
 		formula = new JLabel();
+		sum = new JLabel();
 		if(graph.isRegular()) {
+			sumTemplate = "<html>&sum;&nbsp;(s=1..t) &alpha;[s]&nbsp;= %s</html>";
 			formula.setText("<html>&sum;&nbsp;(s=1..t) &alpha;[s]&nbsp;&ge;&nbsp;c*log<sup>4</sup>(n)*log<sup>2</sup>(d) </html>");
 		} else {
+			sumTemplate = "<html>&sum;&nbsp;(t=1..&tau;) &phi;[t]&nbsp;= %s</html>";
 			formula.setText("<html>&sum;&nbsp;(t=1..&tau;) &phi;[t]&nbsp;&ge;&nbsp;b*&rho;*log(n) </html>");
 			JLabel minmax = new JLabel();
 			place.add(minmax);
@@ -250,6 +254,9 @@ public class MainWindow implements Observer {
 		}
 		formula.setFont(font2);
 		formula.setBorder(new EmptyBorder(20, 0, 0, 20));
+		sum.setBorder(new EmptyBorder(20, 0, 0, 20));
+		sum.setFont(font2);
+		place.add(sum);
 		place.add(formula);				
 		
 		place.setBorder(new EmptyBorder(20, 0, 0, 20));
@@ -322,6 +329,7 @@ public class MainWindow implements Observer {
 		expansion.setText("Expansion: " + doubleFormat.format(graph.getExpansion()));
 		prediction.setText("All informed: at the end of round " + generator.getGuess());
 		probability.setText("With probability = " + doubleFormat.format(generator.probability));
+		sum.setText(String.format(sumTemplate, doubleFormat.format(generator.getSum())));
 	}
 
 	@Override

@@ -5,10 +5,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.Observable;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 public class GraphGenerator extends Observable implements Runnable {
 	private final BlockingQueue<Graph> channel;
 	private Graph template;
 	private double conductance, expansion;
+	private AtomicDouble sum;
 	private AtomicInteger prediction;
 	public final double probability;
 	public AtomicBoolean needToStop;
@@ -23,6 +26,7 @@ public class GraphGenerator extends Observable implements Runnable {
 		template = template_;
 		conductance = expansion = 0;
 		prediction = new AtomicInteger(PRED_DEFAULT);
+		sum = new AtomicDouble();
 		double beta = 1;
 		probability = 1	- Math.pow(template.vertexCount(), -beta);
 		logn = Math.log(template.vertexCount());
@@ -52,8 +56,16 @@ public class GraphGenerator extends Observable implements Runnable {
 			g.spreadRumor();
 			generated++;
 			template = g;
-			conductance += g.getConductance();
-			expansion += g.getExpansion();
+			if (template.isRegular())
+			{
+				conductance += g.getConductance();
+				sum.getAndAdd(conductance);
+			}
+			else
+			{
+				expansion += g.getExpansion();
+				sum.getAndAdd(expansion);
+			}
 			if (!template.isRegular() && conductance >= conductanceLowerBound) {
 				System.out.print("Prediction: " + Integer.toString(generated));
 				prediction.compareAndSet(PRED_DEFAULT, generated);
@@ -74,7 +86,7 @@ public class GraphGenerator extends Observable implements Runnable {
 		if (!template.isRegular() && conductance < conductanceLowerBound)
 		{
 			System.out.print("Prediction");
-			double avg = conductance / generated;
+			double avg = sum.get() / generated;
 			double tau = (int)((conductanceLowerBound - conductance) / avg) + generated;
 			prediction.compareAndSet(PRED_DEFAULT, (int)tau);
 		}
@@ -82,7 +94,7 @@ public class GraphGenerator extends Observable implements Runnable {
 		{
 			System.out.print("Prediction");
 
-			double avg = expansion / generated;
+			double avg = sum.get() / generated;
 			double tau = (int)((expansionLowerBound - expansion)/ avg) + generated;
 			prediction.compareAndSet(PRED_DEFAULT, (int)tau);
 		}
@@ -93,6 +105,11 @@ public class GraphGenerator extends Observable implements Runnable {
 	public int getGuess()
 	{
 		return prediction.get();
+	}
+	
+	public double getSum()
+	{
+		return sum.get();
 	}
 
 	@Override
