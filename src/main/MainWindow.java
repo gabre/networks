@@ -41,6 +41,7 @@ public class MainWindow implements Observer {
 	private final float parameter;
 	private JLabel formula, sum;
 	private String sumTemplate;
+	private JLabel parameter_l;
 
 	private static final Dimension WINDOW_SIZE = new Dimension(1500,1000);
 	private static final int CHANNEL_CAPACITY = 10;
@@ -239,10 +240,12 @@ public class MainWindow implements Observer {
 		prediction.setBorder(b);
 		
 		formula = new JLabel();
+		parameter_l = new JLabel();
 		sum = new JLabel();
 		if(graph.isRegular()) {
 			sumTemplate = "<html>&sum;&nbsp;(s=1..t) &alpha;[s]&nbsp;= %s</html>";
 			formula.setText("<html>&sum;&nbsp;(s=1..t) &alpha;[s]&nbsp;&ge;&nbsp;c*log<sup>4</sup>(n)*log<sup>2</sup>(d) </html>");
+			parameter_l.setText("Parameter c=" + Float.toString(parameter));
 		} else {
 			sumTemplate = "<html>&sum;&nbsp;(t=1..&tau;) &phi;[t]&nbsp;= %s</html>";
 			formula.setText("<html>&sum;&nbsp;(t=1..&tau;) &phi;[t]&nbsp;&ge;&nbsp;b*&rho;*log(n) </html>");
@@ -251,11 +254,14 @@ public class MainWindow implements Observer {
 			minmax.setFont(font);
 			minmax.setBorder(b);
 			minmax.setText("Degree max/min=rho: " + Integer.toString(graph.getMax()) + "/" + Integer.toString(graph.getMin()) + "=" + Double.toString(graph.rho()));
+			parameter_l.setText("Parameter b=" + Float.toString(parameter));
 		}
 		formula.setFont(font2);
 		formula.setBorder(new EmptyBorder(20, 0, 0, 20));
 		sum.setBorder(new EmptyBorder(20, 0, 0, 20));
-		sum.setFont(font2);
+		sum.setFont(font);
+		parameter_l.setFont(font);
+		place.add(parameter_l);
 		place.add(sum);
 		place.add(formula);				
 		
@@ -325,8 +331,8 @@ public class MainWindow implements Observer {
 	private void setInformation()
 	{
 		counter.setText("Graphs: " + (current + 1) + " / " + history.size());
-		conductance.setText("Conductance: " + doubleFormat.format(graph.getConductance()));
-		expansion.setText("Expansion: " + doubleFormat.format(graph.getExpansion()));
+		conductance.setText("<html>Conductance (&phi;): " + doubleFormat.format(graph.getConductance()) + "</html>");
+		expansion.setText("<html>Expansion (&alpha;): " + doubleFormat.format(graph.getExpansion()) + "</html>");
 		prediction.setText("All informed: at the end of round " + generator.getGuess());
 		probability.setText("With probability = " + doubleFormat.format(generator.probability));
 		sum.setText(String.format(sumTemplate, doubleFormat.format(generator.getSum())));
