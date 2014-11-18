@@ -17,26 +17,26 @@ public class GraphGenerator extends Observable implements Runnable {
 	private final int PRED_DEFAULT = 0;
 	public volatile boolean generationEnded = false;
 
-	public GraphGenerator(BlockingQueue<Graph> channel_, Graph template_)
+	public GraphGenerator(BlockingQueue<Graph> channel_, Graph template_, float param)
 	{
 		channel = channel_;
 		template = template_;
 		conductance = expansion = 0;
 		prediction = new AtomicInteger(PRED_DEFAULT);
 		double beta = 1;
-		probability = 1 - Math.pow(template.vertexCount(), -beta);
+		probability = 1	- Math.pow(template.vertexCount(), -beta);
 		logn = Math.log(template.vertexCount());
 		generated = 1;
 		if (template.isRegular())
 		{
 			double logd = Math.log(template.degrees());
-			double c = 0.020 * beta;
+			double c = param; //0.13 * beta;
 			expansionLowerBound = c * beta * Math.pow(logn, 4) * Math.pow(logd, 2);
 			System.out.println("lower bound: " + expansionLowerBound);
 		}
 		else
 		{
-			double b = 0.034 * beta;
+			double b = param; //0.042 * beta;
 			conductanceLowerBound = b * template.rho() * logn;
 			System.out.println("lower bound: " + conductanceLowerBound);
 		}
@@ -60,12 +60,10 @@ public class GraphGenerator extends Observable implements Runnable {
 			}
 			if (template.isRegular() && expansion >= expansionLowerBound) {
 				System.out.print("Prediction: " + Integer.toString(generated));
-				prediction.compareAndSet(PRED_DEFAULT, generated);		
+				prediction.compareAndSet(PRED_DEFAULT, generated);
 			}
 			try {
 				channel.put(g);
-			    setChanged();
-			    notifyObservers();
 			} catch (InterruptedException e) {
 				return;
 			}
@@ -77,8 +75,6 @@ public class GraphGenerator extends Observable implements Runnable {
 			double avg = conductance / generated;
 			double tau = (int)((conductanceLowerBound - conductance) / avg) + generated;
 			prediction.compareAndSet(PRED_DEFAULT, (int)tau);
-		    setChanged();
-		    notifyObservers();
 		}
 		if (template.isRegular() && expansion < expansionLowerBound)
 		{
@@ -87,9 +83,9 @@ public class GraphGenerator extends Observable implements Runnable {
 			double avg = expansion / generated;
 			double tau = (int)((expansionLowerBound - expansion)/ avg) + generated;
 			prediction.compareAndSet(PRED_DEFAULT, (int)tau);
-		    setChanged();
-		    notifyObservers();
 		}
+	    setChanged();
+	    notifyObservers();
 	}
 	
 	public int getGuess()

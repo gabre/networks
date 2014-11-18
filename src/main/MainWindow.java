@@ -3,6 +3,7 @@ package main;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
@@ -19,6 +20,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
 
 import java.util.Observer;
 
@@ -36,11 +38,14 @@ public class MainWindow implements Observer {
 	private final boolean regular;
 	private final int regularDegree;
 	private final int vertexCount;
+	private final float parameter;
+	private JLabel formula;
 
-	private static final Dimension WINDOW_SIZE = new Dimension(730, 560);
+	private static final Dimension WINDOW_SIZE = new Dimension(1500,1000);
 	private static final int CHANNEL_CAPACITY = 10;
 	
-	public MainWindow(int vertexCount_) {
+	public MainWindow(int vertexCount_, float parameter_) {
+		parameter = parameter_;
 		vertexCount = vertexCount_;
 		regular = false;
 		regularDegree = 0;
@@ -62,7 +67,9 @@ public class MainWindow implements Observer {
 		window.setPreferredSize(WINDOW_SIZE);
 		center.add(visualizer);	
 		center.add(buttons());
+		center.setBorder(new EmptyBorder(5,5,5,5));
 		
+		window.add(new JPanel(), BorderLayout.WEST);
 		window.add(center, BorderLayout.CENTER);
 		window.add(information(), BorderLayout.LINE_END);
 		setInformation();
@@ -72,7 +79,8 @@ public class MainWindow implements Observer {
 		window.setVisible(true);
 	}
 	
-	public MainWindow(int vertexCount_, int degree) {
+	public MainWindow(int vertexCount_, int degree, float parameter_) {
+		parameter = parameter_;
 		vertexCount = vertexCount_;
 		regular = true;
 		regularDegree = degree;
@@ -118,7 +126,7 @@ public class MainWindow implements Observer {
 	private void initGenerator()
 	{
 		channel = new LinkedBlockingQueue<>(CHANNEL_CAPACITY);
-		generator = new GraphGenerator(channel, graph);
+		generator = new GraphGenerator(channel, graph, parameter);
 		generator.addObserver(this);
 	}
 	
@@ -188,21 +196,52 @@ public class MainWindow implements Observer {
 	{
 		JPanel place = new JPanel();
 		place.setLayout(new BoxLayout(place, BoxLayout.Y_AXIS));
+		Font font = new Font("Serif", Font.BOLD, 18);
+		Font font2 = new Font("Serif", Font.BOLD, 22);
+		EmptyBorder b = new EmptyBorder(3,0,3,0);
 		
 		counter = new JLabel();
 		place.add(counter);
+		counter.setFont(font);
+		counter.setBorder(b);
 		
 		conductance = new JLabel();
 		place.add(conductance);
+		conductance.setFont(font);
+		conductance.setBorder(b);
 		
 		expansion = new JLabel();
-		place.add(expansion);		
+		place.add(expansion);
+		expansion.setFont(font);
+		expansion.setBorder(b);
 		
 		probability = new JLabel();
 		place.add(probability);
+		probability.setFont(font);
+		probability.setBorder(b);
 		
 		prediction = new JLabel();
 		place.add(prediction);
+		prediction.setFont(font);
+		prediction.setBorder(b);
+		
+		formula = new JLabel();
+		if(graph.isRegular()) {
+			formula.setText("<html>&sum;&nbsp;(s=1..t) &alpha;[s]&nbsp;&ge;&nbsp;c*log<sup>4</sup>(n)*log<sup>2</sup>(d) </html>");
+		} else {
+			formula.setText("<html>&sum;&nbsp;(t=1..&tau;) &phi;[t]&nbsp;&ge;&nbsp;b*&rho;*log(n) </html>");
+			JLabel minmax = new JLabel();
+			place.add(minmax);
+			minmax.setFont(font);
+			minmax.setBorder(b);
+			minmax.setText("Degree max/min=rho: " + Integer.toString(graph.getMax()) + "/" + Integer.toString(graph.getMin()) + "=" + Double.toString(graph.rho()));
+		}
+		formula.setFont(font2);
+		formula.setBorder(new EmptyBorder(20, 0, 0, 20));
+		place.add(formula);				
+		
+		place.setBorder(new EmptyBorder(20, 0, 0, 20));
+		
 		return place;
 	}
 	

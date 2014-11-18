@@ -2,6 +2,9 @@ package main;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,6 +17,8 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 
+import org.apache.commons.collections15.Transformer;
+
 import com.google.common.collect.Sets;
 
 import edu.uci.ics.jung.algorithms.layout.CircleLayout;
@@ -23,12 +28,24 @@ import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
 
 public class Graph {
+	public int getMin() {
+		return glob_min;
+	}
+
+	public int getMax() {
+		return glob_max;
+	}
+
 	private static Random rand = new Random();
 	private edu.uci.ics.jung.graph.Graph<Vertex, String> graph;
 	private List<Vertex> vertices;
 	private Set<Vertex> vertexSet;
 	private final double conductance, vertexExpansion;
-	private static final Dimension DISPLAY_SIZE = new Dimension(500, 500);
+	private int min;
+	private int max;
+	private int glob_min = 100000;
+	private int glob_max = 0;
+	private static final Dimension DISPLAY_SIZE = new Dimension(900, 850);
 	private static int vertexCount;
 	private static boolean regular;
 	private static int regularDegree;
@@ -256,7 +273,7 @@ public class Graph {
 		}
 		return it.next();
 	}
-	
+
 	private void clearEdges()
 	{
 		graph = new UndirectedSparseGraph<>();
@@ -271,7 +288,8 @@ public class Graph {
 		maxDegrees = new HashMap<>(vertexCount);
 		for (Vertex v : vertices)
 		{
-			int min = 0, max = 0;
+			min = 0;
+			max = 0;
 			boolean valid = false;
 			while (!valid)
 			{
@@ -282,9 +300,14 @@ public class Graph {
 			minDegrees.put(v, min);
 			maxDegrees.put(v, max);
 			double ratio = (double)max / (double)min;
-			if (ratio > rho)
+			if (ratio > rho) {
 				rho = ratio;
+				glob_min = min;
+				glob_max = max;
+			}
 		}
+		System.out.println("max/min/rho  " + Integer.toString(glob_max) + "/" + Integer.toString(glob_min) + " " + Double.toString(rho));
+		System.out.println(rho);
 	}
 
 	public Component getViewer() {
@@ -301,7 +324,15 @@ public class Graph {
 		context.setVertexLabelTransformer(new Vertex.Labeller());
 		context.setVertexFillPaintTransformer(new Vertex.Painter());
 		vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
-
+        Transformer<Vertex,Shape> vertexSize = new Transformer<Vertex,Shape>(){
+            public Shape transform(Vertex i){
+                Ellipse2D circle = new Ellipse2D.Double(-15, -15, 40, 40);
+                // in this case, the vertex is twice as large
+                return circle;
+            }
+        };
+        vv.getRenderContext().setVertexShapeTransformer(vertexSize);
+		
 		return vv;
 	}
 
