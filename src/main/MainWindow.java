@@ -44,15 +44,30 @@ public class MainWindow implements Observer {
 	private static final Dimension WINDOW_SIZE = new Dimension(1500,1000);
 	private static final int CHANNEL_CAPACITY = 10;
 	
+	public static MainWindow create(int vertexCount_, float parameter_)
+	{
+		MainWindow w = new MainWindow(vertexCount_, parameter_);
+		w.initGenerator();
+		w.startGenerator();
+		w.setInformation();
+		return w;
+	}
+	
+	public static MainWindow create(int vertexCount_, int degree, float parameter_)
+	{
+		MainWindow w = new MainWindow(vertexCount_, degree, parameter_);
+		w.initGenerator();
+		w.startGenerator();
+		w.setInformation();
+		return w;
+	}
+	
 	public MainWindow(int vertexCount_, float parameter_) {
 		parameter = parameter_;
 		vertexCount = vertexCount_;
 		regular = false;
 		regularDegree = 0;
 		firstGraph();
-		
-		initGenerator();
-		startGenerator();
 		
 		doubleFormat = new DecimalFormat("#0.0000");
 
@@ -72,7 +87,7 @@ public class MainWindow implements Observer {
 		window.add(new JPanel(), BorderLayout.WEST);
 		window.add(center, BorderLayout.CENTER);
 		window.add(information(), BorderLayout.LINE_END);
-		setInformation();
+		//setInformation();
 		toggleButtons();
 		
 		window.pack();
@@ -85,9 +100,6 @@ public class MainWindow implements Observer {
 		regular = true;
 		regularDegree = degree;
 		firstGraph();
-		
-		initGenerator();
-		startGenerator();
 		
 		doubleFormat = new DecimalFormat("#0.0000");
 
@@ -105,7 +117,7 @@ public class MainWindow implements Observer {
 		
 		window.add(center, BorderLayout.CENTER);
 		window.add(information(), BorderLayout.LINE_END);
-		setInformation();
+		//setInformation();
 		toggleButtons();
 		
 		window.pack();

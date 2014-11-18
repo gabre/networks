@@ -62,6 +62,8 @@ public class GraphGenerator extends Observable implements Runnable {
 				System.out.print("Prediction: " + Integer.toString(generated));
 				prediction.compareAndSet(PRED_DEFAULT, generated);
 			}
+		    setChanged();
+		    notifyObservers();
 			try {
 				channel.put(g);
 			} catch (InterruptedException e) {

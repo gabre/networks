@@ -148,7 +148,7 @@ public class Graph {
 				Sets.intersection(notSaturated, notNeighBoors).copyInto(
 						potentialNeighboors);
 				potentialNeighboors.remove(v);
-				while (degree < min) {
+				while (degree < min && !potentialNeighboors.isEmpty()) {
 					Vertex w = getOne(potentialNeighboors);
 					addEdge(v, w);
 					degree++;
@@ -156,6 +156,8 @@ public class Graph {
 					if (graph.degree(w) == maxDegrees.get(w))
 						notSaturated.remove(w);
 				}
+				if (degree < min)
+					return false;
 				if (degree == maxDegrees.get(v))
 					notSaturated.remove(v);
 			}
@@ -293,8 +295,8 @@ public class Graph {
 			boolean valid = false;
 			while (!valid)
 			{
-				min = rand.nextInt((int)((double)vertexCount / 5.0)) + 1;
-				max = rand.nextInt((int)((double)vertexCount / 2.0)) + (int)(vertexCount / 4.0);
+				min = rand.nextInt((int)((double)vertexCount / 5.0) + 1) + 1;
+				max = rand.nextInt((int)((double)vertexCount / 2.0) + 1) + (int)(vertexCount / 4.0);
 				valid = min <= max;
 			}
 			minDegrees.put(v, min);

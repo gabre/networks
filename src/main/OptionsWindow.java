@@ -129,11 +129,11 @@ public class OptionsWindow extends JFrame {
 
 			if (rdbtnDioButton01.isSelected()) {
 				float parameter = Float.parseFloat(param_b.getText());
-				new MainWindow(parsed, parameter);
+				MainWindow.create(parsed, parameter);
 			} else {
 				float parameter = Float.parseFloat(param_c.getText());
 				int degree = Integer.parseInt(degreeField.getText());
-				new MainWindow(parsed, degree, parameter);
+				MainWindow.create(parsed, degree, parameter);
 			}
 		} catch (NumberFormatException e) {
 			if (rdbtnDioButton01.isSelected()) {
